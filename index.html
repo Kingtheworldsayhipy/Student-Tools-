@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ohm's Law Calculator</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 30px 15px;
+}
+.container {
+  max-width: 480px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px #0001;
+}
+h1 { color: #1d4ed8; }
+p { color: #64748b; }
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  margin-top: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 16px;
+}
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 13px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+#result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eff6ff;
+  border-radius: 8px;
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Ohm's Law Calculator</h1>
+  <p>Enter any TWO values to calculate the others.</p>
+
+  <label>Voltage (V)</label>
+  <input id="v" type="number" min="0" step="any"
+  placeholder="Enter voltage">
+
+  <label>Current (A)</label>
+  <input id="i" type="number" min="0" step="any"
+  placeholder="Enter current">
+
+  <label>Resistance (Ω)</label>
+  <input id="r" type="number" min="0" step="any"
+  placeholder="Enter resistance">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div id="result">
+    Your results will appear here.
+  </div>
+</div>
+
+<script>
+function calculate() {
+  let v = document.getElementById("v").value;
+  let i = document.getElementById("i").value;
+  let r = document.getElementById("r").value;
+
+  let values = [v, i, r];
+  let filled = values.filter(x => x !== "").length;
+
+  let result = document.getElementById("result");
+
+  if (filled !== 2) {
+    result.innerHTML =
+      "Please enter exactly TWO values.";
+    return;
+  }
+
+  v = v === "" ? null : Number(v);
+  i = i === "" ? null : Number(i);
+  r = r === "" ? null : Number(r);
+
+  if ([v, i, r].some(x => x !== null &&
+      (!Number.isFinite(x) || x <= 0))) {
+    result.innerHTML =
+      "Please enter positive numbers only.";
+    return;
+  }
+
+  if (v !== null && i !== null) {
+    r = v / i;
+  } else if (v !== null && r !== null) {
+    i = v / r;
+  } else if (i !== null && r !== null) {
+    v = i * r;
+  }
+
+  let p = v * i;
+
+  result.innerHTML = `
+    <strong>Calculation Results</strong><br>
+    Voltage: ${v.toFixed(4)} V<br>
+    Current: ${i.toFixed(4)} A<br>
+    Resistance: ${r.toFixed(4)} Ω<br>
+    Power: ${p.toFixed(4)} W
+  `;
+}
+</script>
+</body>
+</html>
