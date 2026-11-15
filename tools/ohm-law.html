@@ -1,1 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free Ohm's Law calculator with unit selection and step-by-step formulas.">
+<title>Ohm's Law Calculator - Student Tools</title>
+<style>
+:root {
+  --navy: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --green-soft: #dcfce7;
+  --green: #166534;
+  --red: #b91c1c;
+  --red-soft: #fef2f2;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .06);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+button, input, select { font-family: inherit; }
+:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
 
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  height: 64px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--white); border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy); text-decoration: none;
+}
+.brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+  background: var(--white);
+}
+.back:hover { background: var(--bg); border-color: #cbd5e1; }
+
+/* ---------- Page ---------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 8px; }
+.crumb { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--blue-dark); text-decoration: underline; }
+.crumb strong { color: var(--navy); }
+h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.2; color: var(--navy); }
+.lead { margin: 0 0 24px; color: var(--muted); font-size: 16px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; min-width: 0;
+}
+.card h2 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.card h3 { margin: 22px 0 8px; font-size: 15px; color: var(--navy); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 14px; }
+
+/* ---------- Form ---------- */
+.field { margin-top: 16px; }
+.field label { display: block; font-weight: 700; font-size: 15px; color: var(--navy); }
+.row { display: flex; gap: 8px; margin-top: 7px; }
+.row input {
+  flex: 1; min-width: 0; padding: 12px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #fff;
+}
+.row select, select.unit {
+  flex-shrink: 0; width: 104px; padding: 0 8px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px;
+  background: var(--bg); color: var(--navy); font-weight: 600; cursor: pointer;
+}
+.row input:focus, .row select:focus, select.unit:focus {
+  border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px #bfdbfe;
+}
+.actions { display: flex; gap: 10px; margin-top: 22px; }
+.btn {
+  flex: 1; padding: 13px; border-radius: 10px; border: 0;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-ghost { background: var(--white); color: var(--text); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--bg); }
+.error {
+  display: none; margin-top: 16px; padding: 12px 14px;
+  background: var(--red-soft); color: var(--red);
+  border: 1px solid #fecaca; border-radius: 8px; font-size: 15px;
+}
+.error.show { display: block; }
+
+/* ---------- Results ---------- */
+.placeholder {
+  margin-top: 14px; padding: 28px 16px; text-align: center;
+  background: var(--blue-soft); border-radius: 10px; color: var(--muted);
+}
+.res-list { display: grid; gap: 10px; margin-top: 14px; }
+.res-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white);
+}
+.res-label {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.res-val { font-size: 24px; font-weight: 800; color: var(--navy); word-break: break-all; }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.tag.in { background: #f1f5f9; color: var(--muted); }
+.tag.calc { background: var(--green-soft); color: var(--green); }
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 12px; }
+.step-title { display: block; font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+.steps code {
+  display: block; margin-top: 4px; padding: 8px 10px;
+  background: var(--blue-soft); border-radius: 8px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 14px; color: var(--navy); overflow-wrap: anywhere;
+}
+.note { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+
+/* ---------- Formulas ---------- */
+.formulas { margin-top: 20px; }
+.f-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.f { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.f-eq { font-size: 20px; font-weight: 800; color: var(--blue-dark); }
+.f-d { margin-top: 2px; font-size: 13px; color: var(--muted); }
+.ref-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+
+.footer {
+  margin-top: 36px; padding: 22px 24px; text-align: center;
+  border-top: 1px solid var(--line); background: var(--white);
+  font-size: 14px; color: var(--muted);
+}
+.footer strong { color: var(--navy); }
+
+@media (max-width: 860px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .f-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .f-grid { grid-template-columns: minmax(0, 1fr); }
+  .header { padding: 0 12px; }
+  .wrap { padding: 20px 14px 8px; }
+  h1 { font-size: 25px; }
+  .card { padding: 18px; }
+  .row select, select.unit { width: 92px; }
+  .back span { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="../index.html">
+    <span class="brand-logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+    </span>
+    Student Tools
+  </a>
+  <a class="back" href="../index.html">← <span>Back to dashboard</span></a>
+</header>
+
+<main class="wrap">
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="../index.html">Student Tools</a> / Electrical / <strong>Ohm's Law Calculator</strong>
+  </nav>
+  <h1>Ohm's Law Calculator</h1>
+  <p class="lead">Enter any TWO values, choose your units, and calculate the rest.</p>
+
+  <div class="cols">
+    <section class="card" aria-labelledby="inTitle">
+      <h2 id="inTitle">Inputs</h2>
+      <p class="hint">Fill in exactly two fields and leave the third one empty.</p>
+
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="v">Voltage</label>
+          <div class="row">
+            <input id="v" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter voltage">
+            <select id="vu" aria-label="Voltage unit"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="i">Current</label>
+          <div class="row">
+            <input id="i" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter current">
+            <select id="iu" aria-label="Current unit"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="r">Resistance</label>
+          <div class="row">
+            <input id="r" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter resistance">
+            <select id="ru" aria-label="Resistance unit"></select>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Calculate</button>
+          <button type="button" class="btn btn-ghost" id="resetBtn">Reset</button>
+        </div>
+      </form>
+      <div class="error" id="error" role="alert"></div>
+    </section>
+
+    <section class="card" aria-labelledby="outTitle" aria-live="polite">
+      <h2 id="outTitle">Results</h2>
+      <div class="placeholder" id="placeholder">Your results will appear here.</div>
+      <div id="out" hidden>
+        <p class="hint" style="margin-top:6px">Use the drop-down next to each result to change its unit.</p>
+        <div class="res-list" id="resList"></div>
+        <h3>How it was calculated</h3>
+        <ol class="steps" id="steps"></ol>
+        <p class="note">Steps are shown in base units (V, A, Ω, W).</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="card formulas" aria-labelledby="fTitle">
+    <h2 id="fTitle">Formulas</h2>
+    <div class="f-grid">
+      <div class="f"><div class="f-eq">V = I × R</div><div class="f-d">Voltage = current × resistance</div></div>
+      <div class="f"><div class="f-eq">I = V ÷ R</div><div class="f-d">Current = voltage ÷ resistance</div></div>
+      <div class="f"><div class="f-eq">R = V ÷ I</div><div class="f-d">Resistance = voltage ÷ current</div></div>
+      <div class="f"><div class="f-eq">P = V × I</div><div class="f-d">Power = voltage × current</div></div>
+      <div class="f"><div class="f-eq">P = I² × R</div><div class="f-d">Power from current and resistance</div></div>
+      <div class="f"><div class="f-eq">P = V² ÷ R</div><div class="f-d">Power from voltage and resistance</div></div>
+    </div>
+
+    <div class="ref-cols">
+      <div>
+        <h3>Symbols and units</h3>
+        <table>
+          <tr><th>Symbol</th><th>Quantity</th><th>Base unit</th></tr>
+          <tr><td>V</td><td>Voltage</td><td>volt (V)</td></tr>
+          <tr><td>I</td><td>Current</td><td>ampere (A)</td></tr>
+          <tr><td>R</td><td>Resistance</td><td>ohm (Ω)</td></tr>
+          <tr><td>P</td><td>Power</td><td>watt (W)</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Unit prefixes</h3>
+        <table>
+          <tr><th>Prefix</th><th>Name</th><th>Multiplier</th></tr>
+          <tr><td>µ</td><td>micro</td><td>10⁻⁶</td></tr>
+          <tr><td>m</td><td>milli</td><td>10⁻³</td></tr>
+          <tr><td>k</td><td>kilo</td><td>10³</td></tr>
+          <tr><td>M</td><td>mega</td><td>10⁶</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>Student Tools</strong> — Free tools · Learn by doing · © <span id="year"></span>
+</footer>
+
+<script>
+"use strict";
+
+/* ---------- Units ---------- */
+var KEYS = ["v", "i", "r"];
+var ALL = ["v", "i", "r", "p"];
+var SYMBOL = { v: "V", i: "I", r: "R", p: "P" };
+var UNITS = {
+  v: { label: "Voltage",    base: "V", list: [["µV", 1e-6], ["mV", 1e-3], ["V", 1], ["kV", 1e3], ["MV", 1e6]] },
+  i: { label: "Current",    base: "A", list: [["µA", 1e-6], ["mA", 1e-3], ["A", 1], ["kA", 1e3]] },
+  r: { label: "Resistance", base: "Ω", list: [["mΩ", 1e-3], ["Ω", 1], ["kΩ", 1e3], ["MΩ", 1e6]] },
+  p: { label: "Power",      base: "W", list: [["µW", 1e-6], ["mW", 1e-3], ["W", 1], ["kW", 1e3], ["MW", 1e6]] }
+};
+var lastResult = null;
+
+function $(id) { return document.getElementById(id); }
+
+function baseIndex(key) {
+  var l = UNITS[key].list;
+  for (var x = 0; x < l.length; x++) { if (l[x][1] === 1) return x; }
+  return 0;
+}
+
+function fillUnitSelect(sel, key, idx) {
+  var html = "";
+  UNITS[key].list.forEach(function (u, x) {
+    html += '<option value="' + x + '">' + u[0] + "</option>";
+  });
+  sel.innerHTML = html;
+  sel.value = String(idx);
+}
+
+/* Pick the unit that gives a value of at least 1 (e.g. 0.005 A -> 5 mA) */
+function bestUnit(key, value) {
+  var l = UNITS[key].list;
+  for (var x = l.length - 1; x >= 0; x--) {
+    if (value / l[x][1] >= 1) return x;
+  }
+  return 0;
+}
+
+/* Results use four decimal places, as in the original calculator */
+function fmt(x) {
+  if (x === 0) return "0.0000";
+  var a = Math.abs(x);
+  if (a >= 1e-4 && a < 1e15) return x.toFixed(4);
+  return x.toExponential(4);
+}
+
+/* Short number for the formula steps */
+function n(x) { return String(parseFloat(x.toPrecision(6))); }
+
+/* ---------- Core calculation (values in base units) ---------- */
+function solve(v, i, r) {
+  if (v !== null && i !== null) {
+    r = v / i;
+  } else if (v !== null && r !== null) {
+    i = v / r;
+  } else if (i !== null && r !== null) {
+    v = i * r;
+  }
+  return { v: v, i: i, r: r, p: v * i };
+}
+
+/* ---------- UI helpers ---------- */
+function clearError() {
+  $("error").textContent = "";
+  $("error").classList.remove("show");
+}
+
+function fail(msg) {
+  $("error").textContent = msg;
+  $("error").classList.add("show");
+  $("out").hidden = true;
+  $("placeholder").hidden = false;
+  lastResult = null;
+}
+
+function calculate() {
+  clearError();
+
+  var raw = {}, given = {}, num = {}, base = {}, unitIdx = {}, filled = 0;
+  KEYS.forEach(function (k) {
+    raw[k] = $(k).value;
+    if (raw[k] !== "") filled++;
+  });
+
+  if (filled !== 2) {
+    fail("Please enter exactly TWO values.");
+    return;
+  }
+
+  var bad = false;
+  KEYS.forEach(function (k) {
+    var idx = Number($(k + "u").value);
+    unitIdx[k] = idx;
+    if (raw[k] === "") { base[k] = null; given[k] = false; return; }
+    var x = Number(raw[k]);
+    if (!isFinite(x) || x <= 0) bad = true;
+    num[k] = x;
+    given[k] = true;
+    base[k] = x * UNITS[k].list[idx][1];
+  });
+
+  if (bad) {
+    fail("Please enter positive numbers only.");
+    return;
+  }
+
+  var res = solve(base.v, base.i, base.r);
+  var ok = ALL.every(function (k) { return isFinite(res[k]) && res[k] > 0; });
+  if (!ok) {
+    fail("The result is out of range. Please check your values and units.");
+    return;
+  }
+
+  var units = {};
+  ALL.forEach(function (k) {
+    units[k] = given[k] ? unitIdx[k] : bestUnit(k, res[k]);
+  });
+
+  lastResult = { base: res, given: given, num: num, unitIdx: unitIdx, units: units };
+  renderResults();
+}
+
+function renderResults() {
+  var L = lastResult, html = "";
+
+  ALL.forEach(function (k) {
+    var u = UNITS[k], opts = "";
+    u.list.forEach(function (it, x) {
+      opts += '<option value="' + x + '"' + (x === L.units[k] ? " selected" : "") + ">" + it[0] + "</option>";
+    });
+    var tag = L.given[k] ? '<span class="tag in">Input</span>' : '<span class="tag calc">Calculated</span>';
+    html += '<div class="res-row">' +
+      '<div class="res-label">' + u.label + " " + tag + "</div>" +
+      '<div class="res-val" id="out-' + k + '">' + fmt(L.base[k] / u.list[L.units[k]][1]) + "</div>" +
+      '<select class="unit" data-key="' + k + '" aria-label="' + u.label + ' result unit">' + opts + "</select>" +
+      "</div>";
+  });
+  $("resList").innerHTML = html;
+  $("steps").innerHTML = buildSteps();
+  $("placeholder").hidden = true;
+  $("out").hidden = false;
+}
+
+function buildSteps() {
+  var L = lastResult, b = L.base, g = L.given, items = "";
+
+  /* Step 1: convert inputs to base units (only if needed) */
+  var conv = "";
+  KEYS.forEach(function (k) {
+    var factor = UNITS[k].list[L.unitIdx[k]][1];
+    if (g[k] && factor !== 1) {
+      conv += "<code>" + SYMBOL[k] + " = " + n(L.num[k]) + " " + UNITS[k].list[L.unitIdx[k]][0] +
+        " = " + n(b[k]) + " " + UNITS[k].base + "</code>";
+    }
+  });
+  if (conv) items += '<li><span class="step-title">Convert inputs to base units</span>' + conv + "</li>";
+
+  /* Step 2: find the missing value */
+  var title, eq;
+  if (!g.r) {
+    title = "Find resistance";
+    eq = "R = V ÷ I = " + n(b.v) + " V ÷ " + n(b.i) + " A = " + n(b.r) + " Ω";
+  } else if (!g.i) {
+    title = "Find current";
+    eq = "I = V ÷ R = " + n(b.v) + " V ÷ " + n(b.r) + " Ω = " + n(b.i) + " A";
+  } else {
+    title = "Find voltage";
+    eq = "V = I × R = " + n(b.i) + " A × " + n(b.r) + " Ω = " + n(b.v) + " V";
+  }
+  items += '<li><span class="step-title">' + title + "</span><code>" + eq + "</code></li>";
+
+  /* Step 3: power */
+  items += '<li><span class="step-title">Find power</span><code>P = V × I = ' +
+    n(b.v) + " V × " + n(b.i) + " A = " + n(b.p) + " W</code></li>";
+
+  return items;
+}
+
+function resetAll() {
+  KEYS.forEach(function (k) {
+    $(k).value = "";
+    $(k + "u").value = String(baseIndex(k));
+  });
+  clearError();
+  lastResult = null;
+  $("out").hidden = true;
+  $("placeholder").hidden = false;
+  $("v").focus();
+}
+
+/* ---------- Init ---------- */
+KEYS.forEach(function (k) { fillUnitSelect($(k + "u"), k, baseIndex(k)); });
+$("year").textContent = new Date().getFullYear();
+
+$("form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  calculate();
+});
+$("resetBtn").addEventListener("click", resetAll);
+
+/* Change the unit of one result without recalculating */
+$("resList").addEventListener("change", function (e) {
+  var sel = e.target;
+  if (!sel || !sel.getAttribute || !sel.getAttribute("data-key") || !lastResult) return;
+  var k = sel.getAttribute("data-key");
+  lastResult.units[k] = Number(sel.value);
+  $("out-" + k).textContent = fmt(lastResult.base[k] / UNITS[k].list[lastResult.units[k]][1]);
+});
+</script>
+</body>
+</html>
