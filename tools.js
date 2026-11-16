@@ -1,4 +1,3 @@
-
 /* ==================================================================
    STUDENT TOOLS - TOOL REGISTRY (danh sách công cụ)
    ------------------------------------------------------------------
@@ -45,9 +44,10 @@ window.STUDENT_TOOLS = [
     id: "gpa",
     name: "GPA Calculator",
     category: "academic",
-    status: "soon",
+    status: "available",
+    href: "tools/gpa-calculator.html",
     description: "Calculate your semester and cumulative GPA.",
-    keywords: "gpa grade score study university"
+    keywords: "gpa cgpa grade grades score percentage letter credits study university college semester"
   },
   {
     id: "truth-table",
