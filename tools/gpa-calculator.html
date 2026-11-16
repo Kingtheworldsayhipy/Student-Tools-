@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free GPA calculator for university students worldwide: semester and cumulative GPA from letter grades, percentages or grade points, with custom grading scales and a goal planner.">
+<title>GPA Calculator - Student Tools</title>
+<style>
+:root {
+  --navy: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --green-soft: #dcfce7;
+  --green: #166534;
+  --amber-soft: #fef3c7;
+  --amber: #92400e;
+  --red: #b91c1c;
+  --red-soft: #fef2f2;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .06);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+button, input, select { font-family: inherit; }
+:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  height: 64px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--white); border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy); text-decoration: none;
+}
+.brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+  background: var(--white);
+}
+.back:hover { background: var(--bg); border-color: #cbd5e1; }
+
+/* ---------- Page ---------- */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 8px; }
+.crumb { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--blue-dark); text-decoration: underline; }
+.crumb strong { color: var(--navy); }
+h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.2; color: var(--navy); }
+.lead { margin: 0 0 24px; color: var(--muted); font-size: 16px; }
+
+.card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; min-width: 0;
+}
+.card h2 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.card h3 { margin: 24px 0 8px; font-size: 15px; color: var(--navy); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 14px; }
+.stack > * + * { margin-top: 20px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+
+/* ---------- Form controls ---------- */
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 14px; }
+.field label, .lbl { display: block; font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 6px; }
+input[type=text], input[type=number], select {
+  width: 100%; height: 44px; padding: 0 12px;
+  border: 1px solid #cbd5e1; border-radius: 8px;
+  font-size: 16px; background: #fff; color: var(--text);
+}
+select { cursor: pointer; padding-right: 6px; }
+input[type=text]:focus, input[type=number]:focus, select:focus {
+  border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px #bfdbfe;
+}
+input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; margin: 0; }
+
+details { margin-top: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 14px; color: var(--blue-dark); }
+.details-body { padding: 0 14px 14px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+table.compact th, table.compact td { padding: 8px 6px; }
+table.compact td:first-child { overflow-wrap: anywhere; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scale-edit input { height: 38px; font-size: 15px; min-width: 70px; }
+.mini-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* ---------- Course rows ---------- */
+.grid-row {
+  display: grid; align-items: center; gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 84px 130px 86px 40px;
+}
+.rows-head { margin-top: 18px; padding: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.crow { margin-bottom: 8px; }
+.cell-label { display: none; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.c-skip { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.c-del {
+  width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--white); color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer;
+}
+.c-del:hover { background: var(--red-soft); color: var(--red); border-color: #fecaca; }
+.row-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.count { font-size: 13px; color: var(--muted); }
+
+.btn {
+  padding: 12px 18px; border-radius: 10px; border: 0;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-ghost { background: var(--white); color: var(--text); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--bg); }
+.btn-small { padding: 8px 12px; font-size: 14px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.actions { display: flex; gap: 10px; margin-top: 22px; }
+.actions .btn { flex: 1; padding: 13px; font-size: 16px; }
+
+.error {
+  display: none; margin-top: 16px; padding: 12px 14px;
+  background: var(--red-soft); color: var(--red);
+  border: 1px solid #fecaca; border-radius: 8px; font-size: 14px;
+}
+.error.show { display: block; }
+.error ul { margin: 6px 0 0; padding-left: 20px; }
+
+/* ---------- Results ---------- */
+.placeholder {
+  margin-top: 14px; padding: 28px 16px; text-align: center;
+  background: var(--blue-soft); border-radius: 10px; color: var(--muted);
+}
+.stale {
+  margin-top: 14px; padding: 10px 12px; border-radius: 8px; font-size: 14px;
+  background: var(--amber-soft); color: var(--amber);
+}
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+.kpi { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); min-width: 0; }
+.kpi.main { background: var(--blue-soft); border-color: #bfdbfe; grid-column: 1 / -1; }
+.kpi-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.kpi-val { font-size: 30px; font-weight: 800; color: var(--navy); line-height: 1.2; }
+.kpi.main .kpi-val { font-size: 40px; color: var(--blue-dark); }
+.chip {
+  display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+  background: var(--white); color: var(--blue-dark); border: 1px solid #bfdbfe;
+}
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 12px; }
+.step-title { display: block; font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+.steps code {
+  display: block; margin-top: 4px; padding: 8px 10px;
+  background: var(--blue-soft); border-radius: 8px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 13px; color: var(--navy); overflow-wrap: anywhere;
+}
+.note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.goal-out { margin-top: 16px; padding: 14px 16px; border-radius: 10px; background: var(--blue-soft); border: 1px solid #bfdbfe; }
+.goal-out.warn { background: var(--amber-soft); border-color: #fde68a; color: var(--amber); }
+.goal-out strong { color: var(--navy); }
+.goal-out.warn strong { color: var(--amber); }
+.notes ul { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+.notes li { margin-bottom: 6px; }
+
+.footer {
+  margin-top: 36px; padding: 22px 24px; text-align: center;
+  border-top: 1px solid var(--line); background: var(--white);
+  font-size: 14px; color: var(--muted);
+}
+.footer strong { color: var(--navy); }
+
+@media (max-width: 980px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .header { padding: 0 12px; }
+  .back span { display: none; }
+  .wrap { padding: 20px 14px 8px; }
+  h1 { font-size: 25px; }
+  .card { padding: 18px; }
+  .rows-head { display: none; }
+  .crow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px; padding: 14px; border: 1px solid var(--line);
+    border-radius: 12px; background: var(--bg); margin-bottom: 12px;
+  }
+  .cell-label { display: block; }
+  .c-name { grid-column: 1 / -1; }
+  .c-del { justify-self: end; }
+  .kpi.main .kpi-val { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="../index.html">
+    <span class="brand-logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+    </span>
+    Student Tools
+  </a>
+  <a class="back" href="../index.html">← <span>Back to dashboard</span></a>
+</header>
+
+<main class="wrap">
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="../index.html">Student Tools</a> / Academic / <strong>GPA Calculator</strong>
+  </nav>
+  <h1>GPA Calculator</h1>
+  <p class="lead">Calculate your semester and cumulative GPA from letter grades, percentages, or grade points. Works with any grading scale.</p>
+
+  <div class="stack">
+
+    <!-- Settings -->
+    <section class="card" aria-labelledby="setTitle">
+      <h2 id="setTitle">Settings</h2>
+      <p class="hint">Grading systems differ between schools and countries. Choose the closest preset, or build your own scale.</p>
+      <div class="fields">
+        <div class="field">
+          <label for="mode">How do you enter grades?</label>
+          <select id="mode">
+            <option value="letter">Letter grade (e.g. B+)</option>
+            <option value="percent">Percentage (e.g. 87)</option>
+            <option value="point">Grade points (e.g. 3.3)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="preset">Grading scale</label>
+          <select id="preset"></select>
+        </div>
+      </div>
+      <details id="scaleBox">
+        <summary>View or edit the grade conversion table</summary>
+        <div class="details-body" id="scaleBody"></div>
+      </details>
+    </section>
+
+    <div class="cols">
+      <!-- Inputs -->
+      <section class="card" aria-labelledby="courseTitle">
+        <h2 id="courseTitle">Courses</h2>
+        <p class="hint">Credits can be credit hours, units, or ECTS: use whatever your school weights courses by. Leave empty rows blank. Tick “Exclude” for a course that should not count toward your GPA (for example a pass/fail course or one you retook).</p>
+
+        <form id="form" novalidate>
+          <div class="grid-row rows-head" id="rowsHead" aria-hidden="true"></div>
+          <div id="rows"></div>
+          <div class="row-actions">
+            <button type="button" class="btn btn-ghost btn-small" id="addRow">+ Add course</button>
+            <span class="count" id="rowCount"></span>
+          </div>
+
+          <h3>Previous cumulative GPA (optional)</h3>
+          <p class="hint">Fill this in to see your new cumulative GPA after this semester.</p>
+          <div class="fields">
+            <div class="field">
+              <label for="prevG" id="prevGLabel">Previous cumulative GPA</label>
+              <input id="prevG" data-field="prevG" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 3.20">
+            </div>
+            <div class="field" id="prevPWrap">
+              <label for="prevP">Previous average (%)</label>
+              <input id="prevP" data-field="prevP" type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="e.g. 78.5">
+            </div>
+            <div class="field">
+              <label for="prevC">Credits counted in that GPA</label>
+              <input id="prevC" data-field="prevC" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 60">
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Calculate GPA</button>
+            <button type="button" class="btn btn-ghost" id="resetBtn">Reset all</button>
+          </div>
+        </form>
+        <div class="error" id="error" role="alert"></div>
+      </section>
+
+      <!-- Results -->
+      <section class="card" aria-labelledby="outTitle" aria-live="polite">
+        <h2 id="outTitle">Results</h2>
+        <div class="placeholder" id="placeholder">Your results will appear here.</div>
+        <div id="out" hidden>
+          <div class="stale" id="stale" hidden>You changed something. Press “Calculate GPA” to update these results.</div>
+          <div class="kpis" id="kpis"></div>
+          <h3>Course breakdown</h3>
+          <div class="tbl-wrap"><table id="breakdown" class="compact"></table></div>
+          <p class="note">Weighted = grade points × credits.</p>
+          <h3>How it was calculated</h3>
+          <ol class="steps" id="steps"></ol>
+        </div>
+      </section>
+    </div>
+
+    <!-- Goal planner -->
+    <section class="card" aria-labelledby="goalTitle">
+      <h2 id="goalTitle">Goal planner</h2>
+      <p class="hint" id="goalHint">Find the average GPA you need on your remaining credits to reach a target cumulative GPA.</p>
+      <form id="goalForm" novalidate>
+        <div class="fields">
+          <div class="field">
+            <label for="goalGpa" id="goalGpaLabel">Current cumulative GPA</label>
+            <input id="goalGpa" data-field="goalGpa" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 3.00">
+          </div>
+          <div class="field">
+            <label for="goalDone">Credits counted so far</label>
+            <input id="goalDone" data-field="goalDone" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 60">
+          </div>
+          <div class="field">
+            <label for="goalRemain">Credits still to take</label>
+            <input id="goalRemain" data-field="goalRemain" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 60">
+          </div>
+          <div class="field">
+            <label for="goalTarget" id="goalTargetLabel">Target cumulative GPA</label>
+            <input id="goalTarget" data-field="goalTarget" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 3.20">
+          </div>
+        </div>
+        <div class="actions" style="max-width:360px">
+          <button type="submit" class="btn btn-primary">Find required GPA</button>
+        </div>
+      </form>
+      <div class="error" id="goalError" role="alert"></div>
+      <div class="goal-out" id="goalOut" hidden aria-live="polite"></div>
+    </section>
+
+    <!-- Notes -->
+    <section class="card notes" aria-labelledby="noteTitle">
+      <h2 id="noteTitle">About these calculations</h2>
+      <ul>
+        <li><strong>Formula:</strong> GPA = Σ(grade points × credits) ÷ Σ(credits). In percentage mode, the weighted average uses scores instead of grade points.</li>
+        <li><strong>Rounding:</strong> results are rounded to 2 decimals (half up).</li>
+        <li><strong>Letter equivalent:</strong> the highest grade on your scale at or below your GPA. Honors, dean’s list and probation thresholds differ by school, so check yours.</li>
+        <li><strong>Scales differ.</strong> The built-in presets use the most common US conversions. For other systems (for example 4.3, 4.5, 5.0 or a 10-point scale), choose “Custom”, enter your grades and points (up to 10), then enter grades as letters or grade points.</li>
+        <li><strong>Retakes:</strong> exclude the old attempt. If a retake is already included in your previous GPA, follow your school’s rules to adjust that number first.</li>
+        <li><strong>Privacy:</strong> your entries are saved only in this browser (on your device) so you do not have to retype them. “Reset all” erases them.</li>
+        <li>This tool gives an estimate. Your official GPA is the one issued by your school.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <strong>Student Tools</strong> — Free tools · Learn by doing · © <span id="year"></span>
+</footer>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   GPA Calculator
+   ===================================================================== */
+var STORE_KEY = "studentTools.gpa.v2";
+var OLD_KEYS = ["studentTools.gpa.v1"];
+var MAX_ROWS = 40;
+var MAX_CREDITS = 30;
+var MAX_PREV_CREDITS = 1000;
+var MAX_SCALE_ROWS = 20;
+var MAX_POINTS = 10;
+
+var PRESETS = {
+  us: {
+    name: "US standard · A+ to F with plus/minus (4.0)",
+    list: [
+      { l: "A+", min: 97, pts: 4 }, { l: "A", min: 93, pts: 4 }, { l: "A-", min: 90, pts: 3.7 },
+      { l: "B+", min: 87, pts: 3.3 }, { l: "B", min: 83, pts: 3 }, { l: "B-", min: 80, pts: 2.7 },
+      { l: "C+", min: 77, pts: 2.3 }, { l: "C", min: 73, pts: 2 }, { l: "C-", min: 70, pts: 1.7 },
+      { l: "D+", min: 67, pts: 1.3 }, { l: "D", min: 63, pts: 1 }, { l: "D-", min: 60, pts: 0.7 },
+      { l: "F", min: 0, pts: 0 }
+    ]
+  },
+  us5: {
+    name: "US basic · A, B, C, D, F (4.0)",
+    list: [
+      { l: "A", min: 90, pts: 4 }, { l: "B", min: 80, pts: 3 }, { l: "C", min: 70, pts: 2 },
+      { l: "D", min: 60, pts: 1 }, { l: "F", min: 0, pts: 0 }
+    ]
+  },
+  custom: { name: "Custom (set your own)" }
+};
+
+var nextId = 1;
+var state = null;
+var calculated = false;
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function blank(v) { return String(v == null ? "" : v).trim() === ""; }
+function round2(x) { return Math.round(x * 100 + 1e-9) / 100; }
+function fmt2(x) { return round2(x).toFixed(2); }
+function floor2(x) { return Math.floor(x * 100 + 1e-9) / 100; }
+function ceil2(x) { return Math.ceil(x * 100 - 1e-9) / 100; }
+function n(x) { return String(parseFloat(Number(x).toPrecision(8))); }
+/* 4 -> "4.0", 4.5 -> "4.5", 4.33 -> "4.33", 10 -> "10.0" */
+function ptsText(x) {
+  var t = String(parseFloat(Number(x).toFixed(2)));
+  return t.indexOf(".") === -1 ? t + ".0" : t;
+}
+
+/* ---------- State ---------- */
+function newRow() {
+  return { id: nextId++, name: "", credits: "", gP: "", gL: "", gG: "", skip: false,
+           bad: { c: false, gP: false, gG: false } };
+}
+function toCustom(list) {
+  return list.map(function (e) { return { l: e.l, min: String(e.min), pts: String(e.pts) }; });
+}
+function defaultState() {
+  return {
+    mode: "letter", preset: "us", custom: toCustom(PRESETS.us.list),
+    rows: [newRow(), newRow(), newRow(), newRow()],
+    prevG: "", prevP: "", prevC: "",
+    goalGpa: "", goalDone: "", goalRemain: "", goalTarget: "",
+    bad: {}
+  };
+}
+function findRow(id) {
+  for (var k = 0; k < state.rows.length; k++) if (state.rows[k].id === id) return state.rows[k];
+  return null;
+}
+
+/* ---------- Persistence (this browser only) ---------- */
+function str(x) {
+  if (typeof x === "string") return x.slice(0, 60);
+  if (typeof x === "number" && isFinite(x)) return String(x);
+  return "";
+}
+function save() {
+  try {
+    var d = {
+      mode: state.mode, preset: state.preset, custom: state.custom,
+      rows: state.rows.map(function (r) {
+        return { name: r.name, credits: r.credits, gP: r.gP, gL: r.gL, gG: r.gG, skip: r.skip };
+      }),
+      prevG: state.prevG, prevP: state.prevP, prevC: state.prevC,
+      goalGpa: state.goalGpa, goalDone: state.goalDone, goalRemain: state.goalRemain, goalTarget: state.goalTarget
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  } catch (e) { /* storage may be blocked: the page still works */ }
+}
+function load() {
+  try {
+    OLD_KEYS.forEach(function (k) { localStorage.removeItem(k); });
+    var raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (!d || typeof d !== "object") return null;
+    var s = defaultState();
+    if (["letter", "percent", "point"].indexOf(d.mode) !== -1) s.mode = d.mode;
+    if (["us", "us5", "custom"].indexOf(d.preset) !== -1) s.preset = d.preset;
+    if (Array.isArray(d.custom) && d.custom.length && d.custom.length <= MAX_SCALE_ROWS) {
+      s.custom = d.custom.map(function (e) {
+        e = e || {};
+        return { l: str(e.l).slice(0, 4), min: str(e.min), pts: str(e.pts) };
+      });
+    }
+    if (Array.isArray(d.rows) && d.rows.length) {
+      s.rows = d.rows.slice(0, MAX_ROWS).map(function (r) {
+        var row = newRow();
+        r = r || {};
+        row.name = str(r.name); row.credits = str(r.credits);
+        row.gP = str(r.gP); row.gL = str(r.gL); row.gG = str(r.gG);
+        row.skip = r.skip === true;
+        return row;
+      });
+    }
+    ["prevG", "prevP", "prevC", "goalGpa", "goalDone", "goalRemain", "goalTarget"].forEach(function (k) {
+      s[k] = str(d[k]);
+    });
+    return s;
+  } catch (e) { return null; }
+}
+
+/* ---------- Grading scale ---------- */
+function rawScale() {
+  return state.preset === "custom" ? state.custom : PRESETS[state.preset].list;
+}
+
+/* Validate a scale and return it sorted from the highest minimum score down */
+function parseScale(list) {
+  if (!list || !list.length) {
+    return { ok: false, error: "The grading scale is empty. Add at least one grade." };
+  }
+  var out = [], seenL = {}, seenM = {}, hasZero = false, maxPts = 0;
+  for (var i = 0; i < list.length; i++) {
+    var e = list[i];
+    var l = String(e.l == null ? "" : e.l).trim();
+    if (!l) return { ok: false, error: "Grade " + (i + 1) + " in your custom scale has no letter." };
+    var key = l.toLowerCase();
+    if (seenL[key]) return { ok: false, error: 'The letter "' + l + '" appears twice in your custom scale.' };
+    seenL[key] = true;
+    var mn = Number(e.min), pt = Number(e.pts);
+    if (blank(e.min) || !isFinite(mn) || mn < 0 || mn > 100) {
+      return { ok: false, error: 'The minimum percentage for "' + l + '" must be a number between 0 and 100.' };
+    }
+    if (blank(e.pts) || !isFinite(pt) || pt < 0 || pt > MAX_POINTS) {
+      return { ok: false, error: 'The grade points for "' + l + '" must be a number between 0 and ' + MAX_POINTS + "." };
+    }
+    if (seenM[mn]) return { ok: false, error: "Two grades in your custom scale start at the same percentage (" + n(mn) + ")." };
+    seenM[mn] = true;
+    if (mn === 0) hasZero = true;
+    if (pt > maxPts) maxPts = pt;
+    out.push({ l: l, min: mn, pts: pt });
+  }
+  if (!hasZero) {
+    return { ok: false, error: "Your custom scale needs a lowest grade that starts at 0%, so every percentage has a grade." };
+  }
+  if (maxPts <= 0) {
+    return { ok: false, error: "Your custom scale needs at least one grade worth more than 0 points." };
+  }
+  out.sort(function (a, b) { return b.min - a.min; });
+  return { ok: true, list: out, max: maxPts };
+}
+
+function scoreToEntry(list, s) {
+  for (var k = 0; k < list.length; k++) if (s >= list[k].min) return list[k];
+  return null;
+}
+
+/* Highest grade on the scale at or below the GPA (ties prefer the plain letter, e.g. A over A+) */
+function letterFor(g, list) {
+  var r = round2(g), best = null;
+  for (var k = 0; k < list.length; k++) {
+    var e = list[k];
+    if (e.pts <= r + 1e-9) {
+      if (!best || e.pts > best.pts + 1e-9 || (Math.abs(e.pts - best.pts) <= 1e-9 && e.min < best.min)) best = e;
+    }
+  }
+  return best ? best.l : null;
+}
+
+/* Highest grade points on the active scale (used for labels and limits) */
+function currentMax() {
+  var ps = parseScale(rawScale());
+  return ps.ok ? ps.max : 4;
+}
+
+/* Letters offered in the drop-down (works even while a custom scale is half-edited) */
+function letterChoices() {
+  var seen = {}, arr = [];
+  rawScale().forEach(function (e) {
+    var l = String(e.l == null ? "" : e.l).trim();
+    if (l && !seen[l.toLowerCase()]) { seen[l.toLowerCase()] = true; arr.push({ l: l, min: Number(e.min) }); }
+  });
+  arr.sort(function (a, b) {
+    var x = isFinite(a.min) ? a.min : -1, y = isFinite(b.min) ? b.min : -1;
+    return y - x;
+  });
+  return arr.map(function (e) { return e.l; });
+}
+
+/* ---------- Reading numbers safely ---------- */
+function readNum(key, label, min, max, minExclusive) {
+  if (state.bad[key]) return { err: label + " is not a valid number." };
+  var raw = state[key];
+  if (blank(raw)) return { blank: true };
+  var v = Number(raw);
+  var low = minExclusive ? v <= min : v < min;
+  if (!isFinite(v) || low || v > max) {
+    return { err: label + " must be " + (minExclusive ? "greater than " + n(min) + " and at most " + n(max) : "between " + n(min) + " and " + n(max)) + "." };
+  }
+  return { v: v };
+}
+
+/* ---------- Core calculation ---------- */
+function rowLabel(r, idx) {
+  var nm = String(r.name || "").trim();
+  return "Row " + (idx + 1) + (nm ? " (" + nm + ")" : "");
+}
+
+function computeSemester() {
+  var mode = state.mode, errors = [], items = [];
+  var sumC = 0, sumQP = 0, sumS = 0;
+
+  var ps = parseScale(rawScale());
+  if (!ps.ok) return { ok: false, errors: [ps.error] };
+  var list = ps.list, maxPts = ps.max;
+
+  state.rows.forEach(function (r, idx) {
+    if (r.skip) return;
+    var gradeRaw = mode === "percent" ? r.gP : (mode === "letter" ? r.gL : r.gG);
+    var badG = mode === "percent" ? r.bad.gP : (mode === "point" ? r.bad.gG : false);
+    var emptyC = blank(r.credits) && !r.bad.c;
+    var emptyG = blank(gradeRaw) && !badG;
+    if (emptyC && emptyG) return;
+
+    var label = rowLabel(r, idx), problem = false;
+    var c = NaN, pts = NaN, score = null, letter = null;
+
+    if (r.bad.c) { errors.push(label + ": credits is not a valid number."); problem = true; }
+    else if (emptyC) { errors.push(label + ": enter the credits."); problem = true; }
+    else {
+      c = Number(r.credits);
+      if (!isFinite(c) || c <= 0 || c > MAX_CREDITS) {
+        errors.push(label + ": credits must be greater than 0 and at most " + MAX_CREDITS + ".");
+        problem = true;
+      }
+    }
+
+    if (mode === "percent") {
+      if (badG) { errors.push(label + ": percentage is not a valid number."); problem = true; }
+      else if (emptyG) { errors.push(label + ": enter the percentage."); problem = true; }
+      else {
+        score = Number(gradeRaw);
+        if (!isFinite(score) || score < 0 || score > 100) {
+          errors.push(label + ": percentage must be between 0 and 100."); problem = true;
+        } else {
+          var en = scoreToEntry(list, score);
+          if (!en) { errors.push(label + ": no grade matches this percentage in your scale."); problem = true; }
+          else { pts = en.pts; letter = en.l; }
+        }
+      }
+    } else if (mode === "letter") {
+      if (emptyG) { errors.push(label + ": choose a letter grade."); problem = true; }
+      else {
+        var found = null;
+        for (var k = 0; k < list.length; k++) if (list[k].l === String(gradeRaw)) found = list[k];
+        if (!found) { errors.push(label + ": the grade \"" + gradeRaw + "\" is not in the selected scale."); problem = true; }
+        else { pts = found.pts; letter = found.l; }
+      }
+    } else {
+      if (badG) { errors.push(label + ": grade points is not a valid number."); problem = true; }
+      else if (emptyG) { errors.push(label + ": enter the grade points."); problem = true; }
+      else {
+        pts = Number(gradeRaw);
+        if (!isFinite(pts) || pts < 0 || pts > maxPts) {
+          errors.push(label + ": grade points must be between 0 and " + ptsText(maxPts) + "."); problem = true;
+        }
+      }
+    }
+
+    if (!problem) {
+      items.push({ idx: idx, name: String(r.name || "").trim(), credits: c, score: score, letter: letter, pts: pts, qp: pts * c });
+      sumC += c; sumQP += pts * c;
+      if (score !== null) sumS += score * c;
+    }
+  });
+
+  if (errors.length) return { ok: false, errors: errors };
+  if (!items.length) return { ok: false, errors: ["Add at least one course with credits and a grade."] };
+
+  return {
+    ok: true, items: items, sumC: sumC, sumQP: sumQP, sumS: sumS, list: list, maxPts: maxPts,
+    gpa: sumQP / sumC, avgPct: mode === "percent" ? sumS / sumC : null
+  };
+}
+
+function readPrev(maxPts) {
+  var usePct = state.mode === "percent";
+  var pg = readNum("prevG", "Previous cumulative GPA", 0, maxPts, false);
+  var pp = usePct ? readNum("prevP", "Previous average (%)", 0, 100, false) : { blank: true };
+  var pc = readNum("prevC", "Credits counted in the previous GPA", 0, MAX_PREV_CREDITS, true);
+
+  if (pg.blank && pp.blank && pc.blank) return { none: true };
+
+  var errors = [];
+  if (pg.err) errors.push(pg.err);
+  if (pp.err) errors.push(pp.err);
+  if (pc.err) errors.push(pc.err);
+  if (!pc.err && pc.blank) errors.push("Enter the credits counted in your previous GPA.");
+  if (!pg.err && !pp.err && pg.blank && pp.blank) errors.push("Enter your previous cumulative GPA.");
+  if (errors.length) return { errors: errors };
+
+  return { pg: pg.blank ? null : pg.v, pp: pp.blank ? null : pp.v, c0: pc.v };
+}
+
+/* ---------- Rendering: settings, labels and scale ---------- */
+function renderSettings() {
+  $("mode").value = state.mode;
+  $("preset").innerHTML = Object.keys(PRESETS).map(function (k) {
+    return '<option value="' + k + '">' + esc(PRESETS[k].name) + "</option>";
+  }).join("");
+  $("preset").value = state.preset;
+  $("year").textContent = new Date().getFullYear();
+}
+
+/* Labels and limits that depend on the scale maximum (4.0, 4.5, 10.0, ...) */
+function renderLabels() {
+  var mx = currentMax(), S = ptsText(mx);
+  $("prevGLabel").textContent = "Previous cumulative GPA (out of " + S + ")";
+  $("goalGpaLabel").textContent = "Current cumulative GPA (out of " + S + ")";
+  $("goalTargetLabel").textContent = "Target cumulative GPA (out of " + S + ")";
+  $("goalHint").textContent = "Find the average GPA you need on your remaining credits to reach a target cumulative GPA (out of " + S + ").";
+  $("prevG").max = mx; $("goalGpa").max = mx; $("goalTarget").max = mx;
+  $("prevPWrap").hidden = state.mode !== "percent";
+}
+
+function renderScale() {
+  var body = $("scaleBody");
+  if (state.preset !== "custom") {
+    var ps = parseScale(PRESETS[state.preset].list);
+    var rowsHtml = ps.list.map(function (e) {
+      return "<tr><td><strong>" + esc(e.l) + '</strong></td><td class="num">' + n(e.min) + '%</td><td class="num">' + e.pts.toFixed(1) + "</td></tr>";
+    }).join("");
+    body.innerHTML =
+      '<div class="tbl-wrap"><table><tr><th>Letter</th><th class="num">Percentage from</th><th class="num">Grade points</th></tr>' +
+      rowsHtml + "</table></div>" +
+      '<p class="note">A percentage earns the highest grade whose minimum it reaches. Schools differ: choose “Custom” if yours is not the same.</p>';
+    return;
+  }
+  var edit = state.custom.map(function (e, i) {
+    return "<tr>" +
+      '<td><input class="sc-in" data-i="' + i + '" data-k="l" type="text" maxlength="4" value="' + esc(e.l) + '" aria-label="Letter for grade ' + (i + 1) + '"></td>' +
+      '<td><input class="sc-in" data-i="' + i + '" data-k="min" type="number" min="0" max="100" step="any" inputmode="decimal" value="' + esc(e.min) + '" aria-label="Minimum percentage for grade ' + (i + 1) + '"></td>' +
+      '<td><input class="sc-in" data-i="' + i + '" data-k="pts" type="number" min="0" max="' + MAX_POINTS + '" step="any" inputmode="decimal" value="' + esc(e.pts) + '" aria-label="Grade points for grade ' + (i + 1) + '"></td>' +
+      '<td><button type="button" class="c-del sc-del" data-i="' + i + '" aria-label="Remove grade ' + (i + 1) + '">×</button></td></tr>';
+  }).join("");
+  body.innerHTML =
+    '<div class="tbl-wrap scale-edit"><table><tr><th>Letter</th><th>Percentage from</th><th>Grade points (0–' + MAX_POINTS + ')</th><th></th></tr>' +
+    edit + "</table></div>" +
+    '<div class="mini-actions">' +
+    '<button type="button" class="btn btn-ghost btn-small" id="scAdd">+ Add grade</button>' +
+    '<button type="button" class="btn btn-ghost btn-small" id="scReset">Load US standard</button></div>' +
+    '<p class="note">Keep one grade that starts at 0%. Letters must be different from each other. Your highest grade points set the GPA scale (for example 4.0, 4.5, 5.0 or 10). If you do not use percentages, the percentage column is only needed to keep the table valid.</p>';
+}
+
+/* ---------- Rendering: course rows ---------- */
+function gradeLabel() {
+  return state.mode === "percent" ? "Percentage (0–100)" :
+    (state.mode === "letter" ? "Letter grade" : "Points (0–" + ptsText(currentMax()) + ")");
+}
+
+function renderRows() {
+  var label = gradeLabel();
+  $("rowsHead").innerHTML = "<div>Course (optional)</div><div>Credits</div><div>" + esc(label) + "</div><div></div><div></div>";
+  var letters = letterChoices();
+  var mx = currentMax();
+
+  $("rows").innerHTML = state.rows.map(function (r, i) {
+    var num = i + 1, gradeCell;
+    if (state.mode === "letter") {
+      var opts = '<option value="">Select</option>' + letters.map(function (l) {
+        return '<option value="' + esc(l) + '"' + (l === r.gL ? " selected" : "") + ">" + esc(l) + "</option>";
+      }).join("");
+      gradeCell = '<select class="in-grade" aria-label="Letter grade for row ' + num + '">' + opts + "</select>";
+    } else if (state.mode === "percent") {
+      gradeCell = '<input class="in-grade" type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="e.g. 87" value="' + esc(r.gP) + '" aria-label="Percentage for row ' + num + '">';
+    } else {
+      gradeCell = '<input class="in-grade" type="number" min="0" max="' + mx + '" step="any" inputmode="decimal" placeholder="e.g. 3.3" value="' + esc(r.gG) + '" aria-label="Grade points for row ' + num + '">';
+    }
+    return '<div class="grid-row crow" data-id="' + r.id + '">' +
+      '<div class="c-name"><span class="cell-label">Course (optional)</span>' +
+      '<input class="in-name" type="text" maxlength="60" placeholder="e.g. Calculus 1" value="' + esc(r.name) + '" aria-label="Course name for row ' + num + '"></div>' +
+      '<div class="c-cred"><span class="cell-label">Credits</span>' +
+      '<input class="in-credits" type="number" min="0" max="' + MAX_CREDITS + '" step="any" inputmode="decimal" placeholder="e.g. 3" value="' + esc(r.credits) + '" aria-label="Credits for row ' + num + '"></div>' +
+      '<div class="c-grade"><span class="cell-label">' + esc(label) + "</span>" + gradeCell + "</div>" +
+      '<label class="c-skip" title="Do not count this course in the GPA"><input class="in-skip" type="checkbox"' + (r.skip ? " checked" : "") + ' aria-label="Exclude row ' + num + ' from GPA"> Exclude</label>' +
+      '<button type="button" class="c-del" aria-label="Remove row ' + num + '">×</button></div>';
+  }).join("");
+
+  var cnt = state.rows.length;
+  $("rowCount").textContent = cnt + (cnt === 1 ? " row" : " rows") + (cnt >= MAX_ROWS ? " (maximum)" : "");
+  $("addRow").disabled = cnt >= MAX_ROWS;
+}
+
+function renderFields() {
+  $("prevG").value = state.prevG;
+  $("prevP").value = state.prevP;
+  $("prevC").value = state.prevC;
+  $("goalGpa").value = state.goalGpa;
+  $("goalDone").value = state.goalDone;
+  $("goalRemain").value = state.goalRemain;
+  $("goalTarget").value = state.goalTarget;
+  renderLabels();
+}
+
+function renderAll() {
+  renderSettings();
+  renderScale();
+  renderRows();
+  renderFields();
+}
+
+/* ---------- Errors ---------- */
+function showErrors(box, list) {
+  var shown = list.slice(0, 6);
+  var html = "<strong>Please fix the following:</strong><ul>" +
+    shown.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul>";
+  if (list.length > shown.length) html += "<div>…and " + (list.length - shown.length) + " more.</div>";
+  box.innerHTML = html;
+  box.classList.add("show");
+}
+function clearErrors(box) { box.innerHTML = ""; box.classList.remove("show"); }
+
+function hideResults() {
+  $("out").hidden = true;
+  $("placeholder").hidden = false;
+  calculated = false;
+}
+
+function touched() {
+  save();
+  if (calculated) $("stale").hidden = false;
+}
+
+/* ---------- Results ---------- */
+function letterChip(g, list) {
+  var l = letterFor(g, list);
+  return l ? '<span class="chip">Letter equivalent: ' + esc(l) + "</span>" : "";
+}
+
+function renderResults(sem, prev) {
+  var mode = state.mode, S = ptsText(sem.maxPts);
+  var kpis = "";
+
+  kpis += '<div class="kpi main"><div class="kpi-label">Semester GPA (out of ' + S + ')</div>' +
+    '<div class="kpi-val" id="gpa">' + fmt2(sem.gpa) + "</div>" + letterChip(sem.gpa, sem.list) + "</div>";
+  if (sem.avgPct !== null) {
+    kpis += '<div class="kpi"><div class="kpi-label">Weighted average (%)</div><div class="kpi-val" id="avgPct">' + fmt2(sem.avgPct) + "</div></div>";
+  }
+  kpis += '<div class="kpi"><div class="kpi-label">Credits counted</div><div class="kpi-val" id="credits">' + n(sem.sumC) + "</div></div>";
+
+  var cumG = null, cumP = null;
+  if (prev && !prev.none) {
+    if (prev.pg !== null) {
+      cumG = (prev.pg * prev.c0 + sem.sumQP) / (prev.c0 + sem.sumC);
+      kpis += '<div class="kpi"><div class="kpi-label">New cumulative GPA</div><div class="kpi-val" id="cumG">' + fmt2(cumG) + "</div>" + letterChip(cumG, sem.list) + "</div>";
+    }
+    if (prev.pp !== null && sem.avgPct !== null) {
+      cumP = (prev.pp * prev.c0 + sem.sumS) / (prev.c0 + sem.sumC);
+      kpis += '<div class="kpi"><div class="kpi-label">New cumulative average (%)</div><div class="kpi-val" id="cumP">' + fmt2(cumP) + "</div></div>";
+    }
+  }
+  $("kpis").innerHTML = kpis;
+
+  /* Breakdown table */
+  var head = '<tr><th>Course</th><th class="num">Credits</th>';
+  if (mode === "percent") head += '<th class="num">Score %</th>';
+  if (mode !== "point") head += "<th>Grade</th>";
+  head += '<th class="num">Points</th><th class="num" title="Grade points × credits">Weighted</th></tr>';
+  var body = sem.items.map(function (it) {
+    var t = "<tr><td>" + esc(it.name || "Row " + (it.idx + 1)) + '</td><td class="num">' + n(it.credits) + "</td>";
+    if (mode === "percent") t += '<td class="num">' + n(it.score) + "</td>";
+    if (mode !== "point") t += "<td>" + esc(it.letter) + "</td>";
+    t += '<td class="num">' + n(it.pts) + '</td><td class="num">' + n(round2(it.qp)) + "</td></tr>";
+    return t;
+  }).join("");
+  $("breakdown").innerHTML = head + body;
+
+  /* Steps */
+  var steps = "";
+  var terms = sem.items.map(function (it) { return n(it.pts) + " × " + n(it.credits); });
+  var termText = terms.length <= 8 ? terms.join(" + ") : terms.slice(0, 8).join(" + ") + " + …";
+  steps += '<li><span class="step-title">Add up grade points × credits</span><code>Σ = ' + esc(termText) + " = " + n(round2(sem.sumQP)) + "</code></li>";
+  steps += '<li><span class="step-title">Add up the credits</span><code>Σ credits = ' + n(sem.sumC) + "</code></li>";
+  steps += '<li><span class="step-title">Divide</span><code>GPA = ' + n(round2(sem.sumQP)) + " ÷ " + n(sem.sumC) + " = " + sem.gpa.toFixed(4) + " → " + fmt2(sem.gpa) + "</code></li>";
+  if (sem.avgPct !== null) {
+    steps += '<li><span class="step-title">Weighted average percentage</span><code>Σ(score × credits) ÷ Σ credits = ' + n(round2(sem.sumS)) + " ÷ " + n(sem.sumC) + " = " + sem.avgPct.toFixed(4) + " → " + fmt2(sem.avgPct) + "</code></li>";
+  }
+  if (cumG !== null) {
+    steps += '<li><span class="step-title">New cumulative GPA</span><code>(' + n(prev.pg) + " × " + n(prev.c0) + " + " + n(round2(sem.sumQP)) + ") ÷ (" + n(prev.c0) + " + " + n(sem.sumC) + ") = " + cumG.toFixed(4) + " → " + fmt2(cumG) + "</code></li>";
+  }
+  if (cumP !== null) {
+    steps += '<li><span class="step-title">New cumulative average (%)</span><code>(' + n(prev.pp) + " × " + n(prev.c0) + " + " + n(round2(sem.sumS)) + ") ÷ (" + n(prev.c0) + " + " + n(sem.sumC) + ") = " + cumP.toFixed(4) + " → " + fmt2(cumP) + "</code></li>";
+  }
+  $("steps").innerHTML = steps;
+
+  $("stale").hidden = true;
+  $("placeholder").hidden = true;
+  $("out").hidden = false;
+  calculated = true;
+}
+
+function onCalculate(e) {
+  e.preventDefault();
+  var sem = computeSemester();
+  var prev = readPrev(sem.ok ? sem.maxPts : currentMax());
+  var errors = [].concat(sem.errors || [], prev.errors || []);
+  if (errors.length) {
+    showErrors($("error"), errors);
+    hideResults();
+    return;
+  }
+  clearErrors($("error"));
+  renderResults(sem, prev);
+}
+
+/* ---------- Goal planner ---------- */
+function onGoal(e) {
+  e.preventDefault();
+  var ps = parseScale(rawScale());
+  var out = $("goalOut"), box = $("goalError");
+  if (!ps.ok) { showErrors(box, [ps.error]); out.hidden = true; return; }
+  var mx = ps.max, S = ptsText(mx);
+
+  var G = readNum("goalGpa", "Current cumulative GPA", 0, mx, false);
+  var C = readNum("goalDone", "Credits counted so far", 0, MAX_PREV_CREDITS, true);
+  var R = readNum("goalRemain", "Credits still to take", 0, MAX_PREV_CREDITS, true);
+  var T = readNum("goalTarget", "Target cumulative GPA", 0, mx, false);
+  var errors = [];
+  [[G, "Enter your current cumulative GPA."], [C, "Enter the credits counted so far."],
+   [R, "Enter the credits you still have to take."], [T, "Enter your target GPA."]].forEach(function (p) {
+    if (p[0].err) errors.push(p[0].err); else if (p[0].blank) errors.push(p[1]);
+  });
+  if (errors.length) { showErrors(box, errors); out.hidden = true; return; }
+  clearErrors(box);
+
+  var g = G.v, c = C.v, r = R.v, t = T.v;
+  var req = (t * (c + r) - g * c) / r;
+  var maxFinal = (g * c + mx * r) / (c + r);
+  var minFinal = (g * c) / (c + r);
+  var html, warn = false;
+
+  if (req > mx + 1e-9) {
+    warn = true;
+    html = "<strong>Not reachable.</strong> Even a perfect " + mx.toFixed(2) + " on your next " + n(r) + " credits would bring your cumulative GPA to at most <strong>" + floor2(maxFinal).toFixed(2) + "</strong>, below your target of " + n(t) + ".";
+  } else if (req <= 1e-9) {
+    html = "<strong>Already secured.</strong> Your cumulative GPA will stay at or above " + n(t) + " whatever grades you get on the next " + n(r) + " credits (the lowest it could fall to is about " + floor2(minFinal).toFixed(2) + ").";
+  } else {
+    var need = ceil2(req);
+    html = "You need an average of at least <strong id=\"goalNeed\">" + need.toFixed(2) + "</strong> (out of " + S + ") on your next " + n(r) + " credits to reach a cumulative GPA of " + n(t) + "." +
+      '<div class="note" style="color:inherit">Check: (' + n(g) + " × " + n(c) + " + " + need.toFixed(2) + " × " + n(r) + ") ÷ (" + n(c) + " + " + n(r) + ") ≥ " + n(t) + "</div>";
+  }
+  out.className = "goal-out" + (warn ? " warn" : "");
+  out.innerHTML = html;
+  out.hidden = false;
+  save();
+}
+
+/* ---------- Events ---------- */
+$("rows").addEventListener("input", rowEvent);
+$("rows").addEventListener("change", rowEvent);
+function rowEvent(e) {
+  var t = e.target, rowEl = t.closest ? t.closest(".crow") : null;
+  if (!rowEl) return;
+  var r = findRow(Number(rowEl.getAttribute("data-id")));
+  if (!r) return;
+  var cl = t.classList;
+  if (cl.contains("in-name")) {
+    r.name = t.value;
+  } else if (cl.contains("in-credits")) {
+    r.credits = t.value; r.bad.c = !!(t.validity && t.validity.badInput);
+  } else if (cl.contains("in-grade")) {
+    if (state.mode === "percent") { r.gP = t.value; r.bad.gP = !!(t.validity && t.validity.badInput); }
+    else if (state.mode === "point") { r.gG = t.value; r.bad.gG = !!(t.validity && t.validity.badInput); }
+    else { r.gL = t.value; }
+  } else if (cl.contains("in-skip")) {
+    r.skip = t.checked;
+  } else { return; }
+  touched();
+}
+
+$("rows").addEventListener("click", function (e) {
+  var btn = e.target.closest ? e.target.closest(".c-del") : null;
+  if (!btn) return;
+  var rowEl = btn.closest(".crow");
+  var id = Number(rowEl.getAttribute("data-id"));
+  if (state.rows.length <= 1) {
+    state.rows = [newRow()];
+  } else {
+    state.rows = state.rows.filter(function (r) { return r.id !== id; });
+  }
+  renderRows();
+  touched();
+});
+
+$("addRow").addEventListener("click", function () {
+  if (state.rows.length >= MAX_ROWS) return;
+  state.rows.push(newRow());
+  renderRows();
+  touched();
+  var names = document.querySelectorAll(".in-name");
+  if (names.length) names[names.length - 1].focus();
+});
+
+$("mode").addEventListener("change", function () {
+  state.mode = $("mode").value;
+  renderRows();
+  renderLabels();
+  touched();
+});
+
+$("preset").addEventListener("change", function () {
+  state.preset = $("preset").value;
+  renderScale();
+  renderRows();
+  renderLabels();
+  if (state.preset === "custom") $("scaleBox").open = true;
+  touched();
+});
+
+/* Previous GPA + goal fields */
+document.addEventListener("input", function (e) {
+  var t = e.target, f = t.getAttribute ? t.getAttribute("data-field") : null;
+  if (!f) return;
+  state[f] = t.value;
+  state.bad[f] = !!(t.validity && t.validity.badInput);
+  /* Only the previous-GPA fields affect the semester results; the goal planner is independent */
+  if (f.indexOf("prev") === 0) touched(); else save();
+});
+
+/* Custom scale editor */
+$("scaleBody").addEventListener("input", function (e) {
+  var t = e.target;
+  if (!t.classList.contains("sc-in")) return;
+  var i = Number(t.getAttribute("data-i")), k = t.getAttribute("data-k");
+  if (state.custom[i]) { state.custom[i][k] = t.value; touched(); }
+});
+$("scaleBody").addEventListener("change", function (e) {
+  if (e.target.classList.contains("sc-in")) { renderRows(); renderLabels(); }
+});
+$("scaleBody").addEventListener("click", function (e) {
+  var t = e.target;
+  if (t.classList.contains("sc-del")) {
+    if (state.custom.length > 1) state.custom.splice(Number(t.getAttribute("data-i")), 1);
+    renderScale(); renderRows(); renderLabels(); touched();
+  } else if (t.id === "scAdd") {
+    if (state.custom.length < MAX_SCALE_ROWS) state.custom.push({ l: "", min: "", pts: "" });
+    renderScale(); touched();
+    var ins = $("scaleBody").querySelectorAll('.sc-in[data-k="l"]');
+    if (ins.length) ins[ins.length - 1].focus();
+  } else if (t.id === "scReset") {
+    state.custom = toCustom(PRESETS.us.list);
+    renderScale(); renderRows(); renderLabels(); touched();
+  }
+});
+
+$("form").addEventListener("submit", onCalculate);
+$("goalForm").addEventListener("submit", onGoal);
+
+$("resetBtn").addEventListener("click", function () {
+  if (!window.confirm("Clear all courses, settings and results?")) return;
+  try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+  state = defaultState();
+  clearErrors($("error"));
+  clearErrors($("goalError"));
+  $("goalOut").hidden = true;
+  hideResults();
+  renderAll();
+});
+
+/* ---------- Init ---------- */
+state = load() || defaultState();
+renderAll();
+</script>
+</body>
+</html>
