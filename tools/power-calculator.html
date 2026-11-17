@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free electrical power calculator: DC power from any two of voltage, current, resistance and power; AC power with power factor (single-phase and three-phase); energy use and electricity cost.">
+<title>Power Calculator - Student Tools</title>
+<style>
+:root {
+  --navy: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --green-soft: #dcfce7;
+  --green: #166534;
+  --red: #b91c1c;
+  --red-soft: #fef2f2;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .06);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+button, input, select { font-family: inherit; }
+:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  height: 64px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--white); border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy); text-decoration: none;
+}
+.brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+  background: var(--white);
+}
+.back:hover { background: var(--bg); border-color: #cbd5e1; }
+
+/* ---------- Page ---------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 8px; }
+.crumb { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--blue-dark); text-decoration: underline; }
+.crumb strong { color: var(--navy); }
+h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.2; color: var(--navy); }
+.lead { margin: 0 0 22px; color: var(--muted); font-size: 16px; }
+
+/* ---------- Tabs ---------- */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.tab {
+  padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--white); color: var(--text);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.tab:hover { background: var(--bg); }
+.tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; min-width: 0;
+}
+.card + .card { margin-top: 20px; }
+.cols .card + .card { margin-top: 0; }
+.card h2 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.card h3 { margin: 22px 0 8px; font-size: 15px; color: var(--navy); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 14px; }
+
+/* ---------- Form ---------- */
+.field { margin-top: 16px; }
+.field label { display: block; font-weight: 700; font-size: 15px; color: var(--navy); }
+.field .sub { font-weight: 400; color: var(--muted); font-size: 13px; }
+.row { display: flex; gap: 8px; margin-top: 7px; }
+.row input, .field > input, .field > select {
+  flex: 1; min-width: 0; width: 100%; padding: 12px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #fff; color: var(--text);
+}
+.field > input, .field > select { margin-top: 7px; }
+.field > select { height: 48px; padding: 0 10px; cursor: pointer; font-weight: 600; color: var(--navy); }
+.row select, select.unit {
+  flex-shrink: 0; width: 104px; padding: 0 8px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px;
+  background: var(--bg); color: var(--navy); font-weight: 600; cursor: pointer;
+}
+.row input:focus, .row select:focus, select.unit:focus, .field > input:focus, .field > select:focus {
+  border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px #bfdbfe;
+}
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.actions { display: flex; gap: 10px; margin-top: 22px; }
+.btn {
+  flex: 1; padding: 13px; border-radius: 10px; border: 0;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-ghost { background: var(--white); color: var(--text); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--bg); }
+.error {
+  display: none; margin-top: 16px; padding: 12px 14px;
+  background: var(--red-soft); color: var(--red);
+  border: 1px solid #fecaca; border-radius: 8px; font-size: 15px;
+}
+.error.show { display: block; }
+
+/* ---------- Results ---------- */
+.placeholder {
+  margin-top: 14px; padding: 28px 16px; text-align: center;
+  background: var(--blue-soft); border-radius: 10px; color: var(--muted);
+}
+.res-list { display: grid; gap: 10px; margin-top: 14px; }
+.res-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white);
+}
+.res-label {
+  grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.res-val { font-size: 24px; font-weight: 800; color: var(--navy); word-break: break-all; }
+.res-unit { font-size: 16px; font-weight: 700; color: var(--muted); min-width: 40px; text-align: right; }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.tag.in { background: #f1f5f9; color: var(--muted); }
+.tag.calc { background: var(--green-soft); color: var(--green); }
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 12px; }
+.step-title { display: block; font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+.steps code {
+  display: block; margin-top: 4px; padding: 8px 10px;
+  background: var(--blue-soft); border-radius: 8px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 14px; color: var(--navy); overflow-wrap: anywhere; white-space: pre-wrap;
+}
+.note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.note a { color: var(--blue-dark); }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 12px; }
+.eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.f { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.f-eq { font-size: 19px; font-weight: 800; color: var(--blue-dark); overflow-wrap: anywhere; }
+.f-d { margin-top: 2px; font-size: 13px; color: var(--muted); }
+
+.footer {
+  margin-top: 36px; padding: 22px 24px; text-align: center;
+  border-top: 1px solid var(--line); background: var(--white);
+  font-size: 14px; color: var(--muted);
+}
+.footer strong { color: var(--navy); }
+
+@media (max-width: 860px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .header { padding: 0 12px; }
+  .back span { display: none; }
+  .wrap { padding: 20px 14px 8px; }
+  h1 { font-size: 25px; }
+  .card { padding: 18px; }
+  .row select, select.unit { width: 92px; }
+  .tab { flex: 1 1 auto; text-align: center; padding: 10px 12px; font-size: 14px; }
+  .two { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="../index.html">
+    <span class="brand-logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+    </span>
+    Student Tools
+  </a>
+  <a class="back" href="../index.html">← <span>Back to dashboard</span></a>
+</header>
+
+<main class="wrap">
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="../index.html">Student Tools</a> / Electrical / <strong>Power Calculator</strong>
+  </nav>
+  <h1>Power Calculator</h1>
+  <p class="lead">Calculate DC and AC electrical power, power factor, energy use, and electricity cost.</p>
+
+  <div class="tabs" role="tablist" aria-label="Calculator type" id="tabs">
+    <button class="tab active" role="tab" id="tab-dc" aria-controls="panel-dc" aria-selected="true" type="button">DC &amp; basic power</button>
+    <button class="tab" role="tab" id="tab-ac" aria-controls="panel-ac" aria-selected="false" tabindex="-1" type="button">AC power (power factor)</button>
+    <button class="tab" role="tab" id="tab-en" aria-controls="panel-en" aria-selected="false" tabindex="-1" type="button">Energy &amp; cost</button>
+  </div>
+
+  <!-- ================= DC ================= -->
+  <section id="panel-dc" role="tabpanel" aria-labelledby="tab-dc">
+    <div class="cols">
+      <section class="card" aria-labelledby="dcInTitle">
+        <h2 id="dcInTitle">Inputs</h2>
+        <p class="hint">Enter exactly TWO of the four values, choose their units, and calculate the other two.</p>
+        <form id="dc-form" novalidate>
+          <div class="field">
+            <label for="dc-v">Voltage (V)</label>
+            <div class="row"><input id="dc-v" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter voltage"><select id="dc-vu" aria-label="Voltage unit"></select></div>
+          </div>
+          <div class="field">
+            <label for="dc-i">Current (I)</label>
+            <div class="row"><input id="dc-i" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter current"><select id="dc-iu" aria-label="Current unit"></select></div>
+          </div>
+          <div class="field">
+            <label for="dc-r">Resistance (R)</label>
+            <div class="row"><input id="dc-r" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter resistance"><select id="dc-ru" aria-label="Resistance unit"></select></div>
+          </div>
+          <div class="field">
+            <label for="dc-p">Power (P)</label>
+            <div class="row"><input id="dc-p" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter power"><select id="dc-pu" aria-label="Power unit"></select></div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Calculate</button>
+            <button type="button" class="btn btn-ghost" id="dc-reset">Reset</button>
+          </div>
+        </form>
+        <div class="error" id="dc-error" role="alert"></div>
+      </section>
+
+      <section class="card" aria-labelledby="dcOutTitle" aria-live="polite">
+        <h2 id="dcOutTitle">Results</h2>
+        <div class="placeholder" id="dc-placeholder">Your results will appear here.</div>
+        <div id="dc-out" hidden>
+          <p class="hint" style="margin-top:6px">Use the drop-down next to each result to change its unit.</p>
+          <div class="res-list" id="dc-list"></div>
+          <h3>How it was calculated</h3>
+          <ol class="steps" id="dc-steps"></ol>
+          <p class="note">Steps are shown in base units (V, A, Ω, W).</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="dcFTitle">
+      <h2 id="dcFTitle">Formulas</h2>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>To find</th><th colspan="3">Use any of these</th></tr>
+          <tr><td><strong>Power (P)</strong></td><td>V × I</td><td>I² × R</td><td>V² ÷ R</td></tr>
+          <tr><td><strong>Voltage (V)</strong></td><td>I × R</td><td>P ÷ I</td><td>√(P × R)</td></tr>
+          <tr><td><strong>Current (I)</strong></td><td>V ÷ R</td><td>P ÷ V</td><td>√(P ÷ R)</td></tr>
+          <tr><td><strong>Resistance (R)</strong></td><td>V ÷ I</td><td>V² ÷ P</td><td>P ÷ I²</td></tr>
+        </table>
+      </div>
+      <p class="note">Only need Ohm’s law (V, I, R)? Try the <a href="ohm-law.html">Ohm’s Law Calculator</a>.</p>
+    </section>
+  </section>
+
+  <!-- ================= AC ================= -->
+  <section id="panel-ac" role="tabpanel" aria-labelledby="tab-ac" hidden>
+    <div class="cols">
+      <section class="card" aria-labelledby="acInTitle">
+        <h2 id="acInTitle">Inputs</h2>
+        <p class="hint">Enter exactly THREE of the four values: voltage, current, power factor, real power. The fourth is calculated.</p>
+        <form id="ac-form" novalidate>
+          <div class="field">
+            <label for="ac-phase">System</label>
+            <select id="ac-phase">
+              <option value="single">Single-phase</option>
+              <option value="three">Three-phase (balanced load)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ac-v" id="ac-v-label">Voltage (V)</label>
+            <div class="row"><input id="ac-v" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 230"><select id="ac-vu" aria-label="Voltage unit"></select></div>
+          </div>
+          <div class="field">
+            <label for="ac-i">Current (I)</label>
+            <div class="row"><input id="ac-i" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 10"><select id="ac-iu" aria-label="Current unit"></select></div>
+          </div>
+          <div class="field">
+            <label for="ac-pf">Power factor (PF) <span class="sub">between 0 and 1</span></label>
+            <input id="ac-pf" type="number" min="0" max="1" step="any" inputmode="decimal" placeholder="e.g. 0.8">
+          </div>
+          <div class="field">
+            <label for="ac-p">Real power (P)</label>
+            <div class="row"><input id="ac-p" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 1840"><select id="ac-pu" aria-label="Real power unit"></select></div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Calculate</button>
+            <button type="button" class="btn btn-ghost" id="ac-reset">Reset</button>
+          </div>
+        </form>
+        <div class="error" id="ac-error" role="alert"></div>
+      </section>
+
+      <section class="card" aria-labelledby="acOutTitle" aria-live="polite">
+        <h2 id="acOutTitle">Results</h2>
+        <div class="placeholder" id="ac-placeholder">Your results will appear here.</div>
+        <div id="ac-out" hidden>
+          <p class="hint" style="margin-top:6px">Use the drop-down next to a result to change its unit.</p>
+          <div class="res-list" id="ac-list"></div>
+          <h3>How it was calculated</h3>
+          <ol class="steps" id="ac-steps"></ol>
+          <p class="note">Steps are shown in base units (V, A, W, VA, var).</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="acFTitle">
+      <h2 id="acFTitle">Formulas</h2>
+      <div class="eq-grid">
+        <div class="f"><div class="f-eq">S = V × I</div><div class="f-d">Apparent power, single-phase (VA)</div></div>
+        <div class="f"><div class="f-eq">P = V × I × PF</div><div class="f-d">Real power, single-phase (W)</div></div>
+        <div class="f"><div class="f-eq">S = √3 × V × I</div><div class="f-d">Apparent power, three-phase (V = line-to-line)</div></div>
+        <div class="f"><div class="f-eq">P = √3 × V × I × PF</div><div class="f-d">Real power, three-phase</div></div>
+        <div class="f"><div class="f-eq">Q = S × √(1 − PF²)</div><div class="f-d">Reactive power (var), same as √(S² − P²)</div></div>
+        <div class="f"><div class="f-eq">PF = P ÷ S = cos φ</div><div class="f-d">Power factor and phase angle φ</div></div>
+      </div>
+      <p class="note">Three-phase results assume a balanced load; V is the line-to-line voltage and I is the line current. The sign of Q (lagging or leading) is not shown.</p>
+    </section>
+  </section>
+
+  <!-- ================= Energy ================= -->
+  <section id="panel-en" role="tabpanel" aria-labelledby="tab-en" hidden>
+    <div class="cols">
+      <section class="card" aria-labelledby="enInTitle">
+        <h2 id="enInTitle">Inputs</h2>
+        <p class="hint">Estimate how much energy a device uses and what it costs. The price is optional.</p>
+        <form id="en-form" novalidate>
+          <div class="field">
+            <label for="en-p">Power of one device</label>
+            <div class="row"><input id="en-p" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 100"><select id="en-pu" aria-label="Power unit"></select></div>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="en-qty">Number of devices</label>
+              <input id="en-qty" type="number" min="1" step="1" inputmode="numeric" value="1">
+            </div>
+            <div class="field">
+              <label for="en-hours">Hours per day</label>
+              <input id="en-hours" type="number" min="0" max="24" step="any" inputmode="decimal" placeholder="e.g. 5">
+            </div>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="en-price">Price per kWh <span class="sub">(optional)</span></label>
+              <input id="en-price" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 0.12">
+            </div>
+            <div class="field">
+              <label for="en-cur">Currency symbol <span class="sub">(optional)</span></label>
+              <input id="en-cur" type="text" maxlength="4" value="$" autocomplete="off">
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Calculate</button>
+            <button type="button" class="btn btn-ghost" id="en-reset">Reset</button>
+          </div>
+        </form>
+        <div class="error" id="en-error" role="alert"></div>
+      </section>
+
+      <section class="card" aria-labelledby="enOutTitle" aria-live="polite">
+        <h2 id="enOutTitle">Results</h2>
+        <div class="placeholder" id="en-placeholder">Your results will appear here.</div>
+        <div id="en-out" hidden>
+          <div class="tbl-wrap"><table id="en-table"></table></div>
+          <p class="note" id="en-extra"></p>
+          <h3>How it was calculated</h3>
+          <ol class="steps" id="en-steps"></ol>
+          <p class="note">A month is taken as 30 days and a year as 365 days.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="enFTitle">
+      <h2 id="enFTitle">Formulas</h2>
+      <div class="eq-grid">
+        <div class="f"><div class="f-eq">E = P × t</div><div class="f-d">Energy = power × time (kWh when P is in kW and t in hours)</div></div>
+        <div class="f"><div class="f-eq">Cost = E × price</div><div class="f-d">Price is per kWh</div></div>
+        <div class="f"><div class="f-eq">1 kWh = 3.6 MJ</div><div class="f-d">1 kWh = 3 600 000 J</div></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>Student Tools</strong> — Free tools · Learn by doing · © <span id="year"></span>
+</footer>
+
+<script>
+"use strict";
+
+/* ---------- Units (factor = how many base units in one of this unit) ---------- */
+var U = {
+  V:  [["µV", 1e-6], ["mV", 1e-3], ["V", 1], ["kV", 1e3], ["MV", 1e6]],
+  I:  [["µA", 1e-6], ["mA", 1e-3], ["A", 1], ["kA", 1e3]],
+  R:  [["mΩ", 1e-3], ["Ω", 1], ["kΩ", 1e3], ["MΩ", 1e6]],
+  P:  [["µW", 1e-6], ["mW", 1e-3], ["W", 1], ["kW", 1e3], ["MW", 1e6]],
+  aV: [["V", 1], ["kV", 1e3], ["MV", 1e6]],
+  aI: [["mA", 1e-3], ["A", 1], ["kA", 1e3]],
+  aP: [["W", 1], ["kW", 1e3], ["MW", 1e6]],
+  aS: [["VA", 1], ["kVA", 1e3], ["MVA", 1e6]],
+  aQ: [["var", 1], ["kvar", 1e3], ["Mvar", 1e6]],
+  eP: [["mW", 1e-3], ["W", 1], ["kW", 1e3], ["MW", 1e6]]
+};
+var DC_LABEL = { V: "Voltage", I: "Current", R: "Resistance", P: "Power" };
+var DC_BASE = { V: "V", I: "A", R: "Ω", P: "W" };
+var LAST = { dc: null, ac: null };
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function baseIndex(list) {
+  for (var x = 0; x < list.length; x++) if (list[x][1] === 1) return x;
+  return 0;
+}
+function fillSelect(id, list) {
+  $(id).innerHTML = list.map(function (u, x) { return '<option value="' + x + '">' + esc(u[0]) + "</option>"; }).join("");
+  $(id).value = String(baseIndex(list));
+}
+/* Choose the unit that gives a value of at least 1 (0.005 A -> 5 mA) */
+function bestUnit(list, value) {
+  for (var x = list.length - 1; x >= 0; x--) if (value / list[x][1] >= 1) return x;
+  return 0;
+}
+/* Four decimal places, like the Ohm's Law calculator */
+function fmt(x) {
+  if (x === 0) return "0.0000";
+  var a = Math.abs(x);
+  if (a >= 1e-4 && a < 1e15) return x.toFixed(4);
+  return x.toExponential(4);
+}
+/* Short number for the formula steps */
+function n(x) { return String(parseFloat(Number(x).toPrecision(6))); }
+function money(x) {
+  return (Math.round(x * 100 + 1e-9) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function bestText(list, value) {
+  var i = bestUnit(list, value);
+  return fmt(value / list[i][1]) + " " + list[i][0];
+}
+
+function clearError(p) { $(p + "-error").textContent = ""; $(p + "-error").classList.remove("show"); }
+function fail(p, msg) {
+  $(p + "-error").textContent = msg;
+  $(p + "-error").classList.add("show");
+  $(p + "-out").hidden = true;
+  $(p + "-placeholder").hidden = false;
+  if (LAST[p] !== undefined) LAST[p] = null;
+}
+function showOut(p) {
+  $(p + "-placeholder").hidden = true;
+  $(p + "-out").hidden = false;
+}
+function hideOut(p) {
+  $(p + "-out").hidden = true;
+  $(p + "-placeholder").hidden = false;
+  if (LAST[p] !== undefined) LAST[p] = null;
+}
+function badInputName(defs) {
+  for (var k = 0; k < defs.length; k++) {
+    var el = $(defs[k][0]);
+    if (el.validity && el.validity.badInput) return defs[k][1];
+  }
+  return null;
+}
+
+/* ---------- Result rows with a unit drop-down ---------- */
+function renderRows(p) {
+  var L = LAST[p], html = "";
+  L.rows.forEach(function (r, i) {
+    var tag = r.given === true ? '<span class="tag in">Input</span>' : (r.given === false ? '<span class="tag calc">Calculated</span>' : "");
+    html += '<div class="res-row"><div class="res-label">' + esc(r.label) + " " + tag + "</div>";
+    if (r.list) {
+      var opts = r.list.map(function (u, x) {
+        return '<option value="' + x + '"' + (x === r.idx ? " selected" : "") + ">" + esc(u[0]) + "</option>";
+      }).join("");
+      html += '<div class="res-val" id="' + p + "-val-" + i + '">' + fmt(r.base / r.list[r.idx][1]) + "</div>" +
+        '<select class="unit" data-panel="' + p + '" data-i="' + i + '" aria-label="' + esc(r.label) + ' unit">' + opts + "</select>";
+    } else {
+      html += '<div class="res-val" id="' + p + "-val-" + i + '">' + esc(r.text) + '</div><div class="res-unit">' + esc(r.suffix || "") + "</div>";
+    }
+    html += "</div>";
+  });
+  $(p + "-list").innerHTML = html;
+}
+function stepsHtml(steps) {
+  return steps.map(function (s) {
+    return '<li><span class="step-title">' + esc(s[0]) + "</span><code>" + esc(s[1]) + "</code></li>";
+  }).join("");
+}
+function onUnitChange(e) {
+  var sel = e.target;
+  if (!sel || !sel.getAttribute) return;
+  var p = sel.getAttribute("data-panel"), i = sel.getAttribute("data-i");
+  if (!p || i === null || !LAST[p]) return;
+  var r = LAST[p].rows[Number(i)];
+  r.idx = Number(sel.value);
+  $(p + "-val-" + i).textContent = fmt(r.base / r.list[r.idx][1]);
+}
+
+/* =====================================================================
+   DC: any two of V, I, R, P
+   ===================================================================== */
+function solveDC(b) {
+  var V = b.V, I = b.I, R = b.R, P = b.P, s = [];
+  if (V !== null && I !== null) {
+    R = V / I; P = V * I;
+    s.push(["Find resistance", "R = V ÷ I = " + n(V) + " V ÷ " + n(I) + " A = " + n(R) + " Ω"]);
+    s.push(["Find power", "P = V × I = " + n(V) + " V × " + n(I) + " A = " + n(P) + " W"]);
+  } else if (V !== null && R !== null) {
+    I = V / R; P = V * V / R;
+    s.push(["Find current", "I = V ÷ R = " + n(V) + " V ÷ " + n(R) + " Ω = " + n(I) + " A"]);
+    s.push(["Find power", "P = V² ÷ R = (" + n(V) + " V)² ÷ " + n(R) + " Ω = " + n(P) + " W"]);
+  } else if (I !== null && R !== null) {
+    V = I * R; P = I * I * R;
+    s.push(["Find voltage", "V = I × R = " + n(I) + " A × " + n(R) + " Ω = " + n(V) + " V"]);
+    s.push(["Find power", "P = I² × R = (" + n(I) + " A)² × " + n(R) + " Ω = " + n(P) + " W"]);
+  } else if (V !== null && P !== null) {
+    I = P / V; R = V * V / P;
+    s.push(["Find current", "I = P ÷ V = " + n(P) + " W ÷ " + n(V) + " V = " + n(I) + " A"]);
+    s.push(["Find resistance", "R = V² ÷ P = (" + n(V) + " V)² ÷ " + n(P) + " W = " + n(R) + " Ω"]);
+  } else if (I !== null && P !== null) {
+    V = P / I; R = P / (I * I);
+    s.push(["Find voltage", "V = P ÷ I = " + n(P) + " W ÷ " + n(I) + " A = " + n(V) + " V"]);
+    s.push(["Find resistance", "R = P ÷ I² = " + n(P) + " W ÷ (" + n(I) + " A)² = " + n(R) + " Ω"]);
+  } else {
+    V = Math.sqrt(P * R); I = Math.sqrt(P / R);
+    s.push(["Find voltage", "V = √(P × R) = √(" + n(P) + " W × " + n(R) + " Ω) = " + n(V) + " V"]);
+    s.push(["Find current", "I = √(P ÷ R) = √(" + n(P) + " W ÷ " + n(R) + " Ω) = " + n(I) + " A"]);
+  }
+  return { V: V, I: I, R: R, P: P, steps: s };
+}
+
+function calcDC() {
+  clearError("dc");
+  var keys = ["V", "I", "R", "P"], base = {}, given = {}, num = {}, uidx = {}, filled = 0;
+  var bad = badInputName(keys.map(function (k) { return ["dc-" + k.toLowerCase(), DC_LABEL[k]]; }));
+  if (bad) { fail("dc", bad + " is not a valid number."); return; }
+  keys.forEach(function (k) { if ($("dc-" + k.toLowerCase()).value !== "") filled++; });
+  if (filled !== 2) { fail("dc", "Please enter exactly TWO values."); return; }
+
+  var nonPositive = false;
+  keys.forEach(function (k) {
+    var raw = $("dc-" + k.toLowerCase()).value;
+    uidx[k] = Number($("dc-" + k.toLowerCase() + "u").value);
+    if (raw === "") { base[k] = null; given[k] = false; return; }
+    var x = Number(raw);
+    if (!isFinite(x) || x <= 0) nonPositive = true;
+    num[k] = x; given[k] = true; base[k] = x * U[k][uidx[k]][1];
+  });
+  if (nonPositive) { fail("dc", "Please enter positive numbers only."); return; }
+
+  var res = solveDC(base);
+  var ok = keys.every(function (k) { return isFinite(res[k]) && res[k] > 0; });
+  if (!ok) { fail("dc", "The result is out of range. Please check your values and units."); return; }
+
+  var steps = [], conv = [];
+  keys.forEach(function (k) {
+    var f = U[k][uidx[k]][1];
+    if (given[k] && f !== 1) conv.push(k + " = " + n(num[k]) + " " + U[k][uidx[k]][0] + " = " + n(base[k]) + " " + DC_BASE[k]);
+  });
+  if (conv.length) steps.push(["Convert inputs to base units", conv.join("\n")]);
+  steps = steps.concat(res.steps);
+
+  LAST.dc = {
+    rows: keys.map(function (k) {
+      return { label: DC_LABEL[k], given: given[k], base: res[k], list: U[k], idx: given[k] ? uidx[k] : bestUnit(U[k], res[k]) };
+    })
+  };
+  renderRows("dc");
+  $("dc-steps").innerHTML = stepsHtml(steps);
+  showOut("dc");
+}
+
+function resetDC() {
+  ["v", "i", "r", "p"].forEach(function (k) { $("dc-" + k).value = ""; });
+  fillSelect("dc-vu", U.V); fillSelect("dc-iu", U.I); fillSelect("dc-ru", U.R); fillSelect("dc-pu", U.P);
+  clearError("dc"); hideOut("dc");
+  $("dc-v").focus();
+}
+
+/* =====================================================================
+   AC: three of V, I, PF, P  ->  fourth, plus S, Q, phase angle
+   ===================================================================== */
+function calcAC() {
+  clearError("ac");
+  var three = $("ac-phase").value === "three";
+  var k = three ? Math.sqrt(3) : 1;
+  var kText = three ? "√3 × " : "";
+  var names = [["ac-v", "Voltage"], ["ac-i", "Current"], ["ac-pf", "Power factor"], ["ac-p", "Real power"]];
+  var bad = badInputName(names);
+  if (bad) { fail("ac", bad + " is not a valid number."); return; }
+
+  var raw = {}, filled = 0;
+  ["v", "i", "pf", "p"].forEach(function (f) { raw[f] = $("ac-" + f).value; if (raw[f] !== "") filled++; });
+  if (filled !== 3) { fail("ac", "Please enter exactly THREE of the four values (voltage, current, power factor, real power)."); return; }
+
+  var uV = Number($("ac-vu").value), uI = Number($("ac-iu").value), uP = Number($("ac-pu").value);
+  var num = {}, V = null, I = null, PF = null, P = null;
+  if (raw.v !== "") { num.V = Number(raw.v); V = num.V * U.aV[uV][1]; }
+  if (raw.i !== "") { num.I = Number(raw.i); I = num.I * U.aI[uI][1]; }
+  if (raw.pf !== "") { PF = Number(raw.pf); }
+  if (raw.p !== "") { num.P = Number(raw.p); P = num.P * U.aP[uP][1]; }
+
+  var given = { V: V !== null, I: I !== null, PF: PF !== null, P: P !== null };
+  var vals = [V, I, P].filter(function (x) { return x !== null; });
+  if (vals.some(function (x) { return !isFinite(x) || x <= 0; })) {
+    fail("ac", "Voltage, current and real power must be positive numbers."); return;
+  }
+  if (PF !== null && (!isFinite(PF) || PF <= 0 || PF > 1)) {
+    fail("ac", "Power factor must be greater than 0 and at most 1."); return;
+  }
+
+  var steps = [], conv = [];
+  if (given.V && U.aV[uV][1] !== 1) conv.push("V = " + n(num.V) + " " + U.aV[uV][0] + " = " + n(V) + " V");
+  if (given.I && U.aI[uI][1] !== 1) conv.push("I = " + n(num.I) + " " + U.aI[uI][0] + " = " + n(I) + " A");
+  if (given.P && U.aP[uP][1] !== 1) conv.push("P = " + n(num.P) + " " + U.aP[uP][0] + " = " + n(P) + " W");
+  if (conv.length) steps.push(["Convert inputs to base units", conv.join("\n")]);
+
+  if (!given.P) {
+    P = k * V * I * PF;
+    steps.push(["Find real power", "P = " + kText + "V × I × PF = " + kText + n(V) + " V × " + n(I) + " A × " + n(PF) + " = " + n(P) + " W"]);
+  } else if (!given.PF) {
+    var pf = P / (k * V * I);
+    if (pf > 1 + 1e-9) {
+      fail("ac", "These values are not possible: the real power is larger than the apparent power (the power factor would be " + n(pf) + "). Check your values and units.");
+      return;
+    }
+    PF = Math.min(1, pf);
+    steps.push(["Find power factor", "PF = P ÷ (" + kText + "V × I) = " + n(P) + " ÷ (" + kText + n(V) + " × " + n(I) + ") = " + n(PF)]);
+  } else if (!given.I) {
+    I = P / (k * V * PF);
+    steps.push(["Find current", "I = P ÷ (" + kText + "V × PF) = " + n(P) + " ÷ (" + kText + n(V) + " × " + n(PF) + ") = " + n(I) + " A"]);
+  } else {
+    V = P / (k * I * PF);
+    steps.push(["Find voltage", "V = P ÷ (" + kText + "I × PF) = " + n(P) + " ÷ (" + kText + n(I) + " × " + n(PF) + ") = " + n(V) + " V"]);
+  }
+
+  var S = k * V * I;
+  var Q = S * Math.sqrt(Math.max(0, 1 - PF * PF));
+  var phi = Math.acos(Math.min(1, PF)) * 180 / Math.PI;
+  if (![V, I, P, S].every(function (x) { return isFinite(x) && x > 0; }) || !isFinite(Q)) {
+    fail("ac", "The result is out of range. Please check your values and units."); return;
+  }
+
+  steps.push(["Find apparent power", "S = " + kText + "V × I = " + kText + n(V) + " V × " + n(I) + " A = " + n(S) + " VA"]);
+  steps.push(["Find reactive power", "Q = S × √(1 − PF²) = " + n(S) + " × √(1 − " + n(PF) + "²) = " + n(Q) + " var"]);
+  steps.push(["Find phase angle", "φ = arccos(PF) = arccos(" + n(PF) + ") = " + phi.toFixed(2) + "°"]);
+
+  var vLabel = three ? "Voltage (line-to-line)" : "Voltage";
+  LAST.ac = {
+    rows: [
+      { label: vLabel, given: given.V, base: V, list: U.aV, idx: given.V ? uV : bestUnit(U.aV, V) },
+      { label: "Current", given: given.I, base: I, list: U.aI, idx: given.I ? uI : bestUnit(U.aI, I) },
+      { label: "Real power (P)", given: given.P, base: P, list: U.aP, idx: given.P ? uP : bestUnit(U.aP, P) },
+      { label: "Apparent power (S)", given: false, base: S, list: U.aS, idx: bestUnit(U.aS, S) },
+      { label: "Reactive power (Q)", given: false, base: Q, list: U.aQ, idx: bestUnit(U.aQ, Q) },
+      { label: "Power factor (PF)", given: given.PF, text: PF.toFixed(4), suffix: "" },
+      { label: "Phase angle (φ)", given: false, text: phi.toFixed(2) + "°", suffix: "" }
+    ]
+  };
+  renderRows("ac");
+  $("ac-steps").innerHTML = stepsHtml(steps);
+  showOut("ac");
+}
+
+function syncPhaseLabel() {
+  $("ac-v-label").textContent = $("ac-phase").value === "three" ? "Voltage (line-to-line)" : "Voltage (V)";
+}
+function resetAC() {
+  ["v", "i", "pf", "p"].forEach(function (f) { $("ac-" + f).value = ""; });
+  $("ac-phase").value = "single";
+  fillSelect("ac-vu", U.aV); fillSelect("ac-iu", U.aI); fillSelect("ac-pu", U.aP);
+  syncPhaseLabel();
+  clearError("ac"); hideOut("ac");
+  $("ac-v").focus();
+}
+
+/* =====================================================================
+   Energy and cost
+   ===================================================================== */
+function calcEN() {
+  clearError("en");
+  var bad = badInputName([["en-p", "Power"], ["en-qty", "Number of devices"], ["en-hours", "Hours per day"], ["en-price", "Price per kWh"]]);
+  if (bad) { fail("en", bad + " is not a valid number."); return; }
+
+  var uP = Number($("en-pu").value);
+  var rawP = $("en-p").value, rawQ = $("en-qty").value, rawH = $("en-hours").value, rawPr = $("en-price").value;
+  if (rawP === "") { fail("en", "Enter the power of the device."); return; }
+  var pIn = Number(rawP);
+  if (!isFinite(pIn) || pIn <= 0) { fail("en", "Power must be a positive number."); return; }
+  if (rawQ === "") { fail("en", "Enter the number of devices."); return; }
+  var qty = Number(rawQ);
+  if (!isFinite(qty) || qty < 1 || Math.floor(qty) !== qty || qty > 1e6) {
+    fail("en", "Number of devices must be a whole number of 1 or more."); return;
+  }
+  if (rawH === "") { fail("en", "Enter the hours of use per day."); return; }
+  var hours = Number(rawH);
+  if (!isFinite(hours) || hours <= 0 || hours > 24) { fail("en", "Hours per day must be greater than 0 and at most 24."); return; }
+  var price = null;
+  if (rawPr !== "") {
+    price = Number(rawPr);
+    if (!isFinite(price) || price < 0) { fail("en", "Price per kWh must be 0 or more."); return; }
+  }
+  var cur = $("en-cur").value.trim().slice(0, 4);
+
+  var pW = pIn * U.eP[uP][1];
+  var totalW = pW * qty;
+  var kwhDay = totalW * hours / 1000;
+  if (!isFinite(kwhDay) || kwhDay <= 0 || (price !== null && !isFinite(kwhDay * 365 * price))) {
+    fail("en", "The result is out of range. Please check your values and units."); return;
+  }
+
+  var periods = [["Per day", 1], ["Per month (30 days)", 30], ["Per year (365 days)", 365]];
+  var head = '<tr><th>Period</th><th class="num">Energy (kWh)</th>' + (price !== null ? '<th class="num">Cost</th>' : "") + "</tr>";
+  var body = periods.map(function (pr) {
+    var e = kwhDay * pr[1];
+    return "<tr><td>" + pr[0] + '</td><td class="num"><strong>' + e.toFixed(4) + "</strong></td>" +
+      (price !== null ? '<td class="num"><strong>' + esc(cur) + money(e * price) + "</strong></td>" : "") + "</tr>";
+  }).join("");
+  $("en-table").innerHTML = head + body;
+  $("en-extra").textContent = "Total power: " + bestText(U.eP, totalW) + " · Energy per day: " + kwhDay.toFixed(4) + " kWh = " + (kwhDay * 3.6).toFixed(4) + " MJ";
+
+  var steps = [];
+  if (U.eP[uP][1] !== 1) steps.push(["Convert power to watts", "P = " + n(pIn) + " " + U.eP[uP][0] + " = " + n(pW) + " W"]);
+  steps.push(["Total power", "P = " + n(pW) + " W × " + n(qty) + (qty === 1 ? " device" : " devices") + " = " + n(totalW) + " W"]);
+  steps.push(["Energy per day", "E = P × t = " + n(totalW) + " W × " + n(hours) + " h = " + n(totalW * hours) + " Wh = " + n(kwhDay) + " kWh"]);
+  if (price !== null) steps.push(["Cost per day", "Cost = E × price = " + n(kwhDay) + " kWh × " + esc(cur) + n(price) + " = " + esc(cur) + money(kwhDay * price)]);
+  steps.push(["Month and year", "30 days: " + n(kwhDay) + " × 30 = " + n(kwhDay * 30) + " kWh\n365 days: " + n(kwhDay) + " × 365 = " + n(kwhDay * 365) + " kWh"]);
+  $("en-steps").innerHTML = steps.map(function (s) {
+    /* s[1] may already contain escaped currency, so only escape the title here */
+    return '<li><span class="step-title">' + esc(s[0]) + "</span><code>" + s[1].replace(/\n/g, "<br>") + "</code></li>";
+  }).join("");
+  showOut("en");
+}
+
+function resetEN() {
+  $("en-p").value = ""; $("en-qty").value = "1"; $("en-hours").value = ""; $("en-price").value = ""; $("en-cur").value = "$";
+  fillSelect("en-pu", U.eP);
+  clearError("en"); hideOut("en");
+  $("en-p").focus();
+}
+
+/* =====================================================================
+   Tabs
+   ===================================================================== */
+var TABS = ["dc", "ac", "en"];
+function selectTab(id, focus) {
+  TABS.forEach(function (t) {
+    var on = t === id, tab = $("tab-" + t);
+    tab.setAttribute("aria-selected", on ? "true" : "false");
+    tab.tabIndex = on ? 0 : -1;
+    tab.classList.toggle("active", on);
+    $("panel-" + t).hidden = !on;
+  });
+  if (focus) $("tab-" + id).focus();
+}
+
+/* ---------- Init ---------- */
+fillSelect("dc-vu", U.V); fillSelect("dc-iu", U.I); fillSelect("dc-ru", U.R); fillSelect("dc-pu", U.P);
+fillSelect("ac-vu", U.aV); fillSelect("ac-iu", U.aI); fillSelect("ac-pu", U.aP);
+fillSelect("en-pu", U.eP);
+$("year").textContent = new Date().getFullYear();
+
+TABS.forEach(function (t) {
+  $("tab-" + t).addEventListener("click", function () { selectTab(t, false); });
+});
+$("tabs").addEventListener("keydown", function (e) {
+  var cur = -1;
+  TABS.forEach(function (t, i) { if ($("tab-" + t).getAttribute("aria-selected") === "true") cur = i; });
+  var next = null;
+  if (e.key === "ArrowRight") next = (cur + 1) % TABS.length;
+  else if (e.key === "ArrowLeft") next = (cur + TABS.length - 1) % TABS.length;
+  else if (e.key === "Home") next = 0;
+  else if (e.key === "End") next = TABS.length - 1;
+  if (next !== null) { e.preventDefault(); selectTab(TABS[next], true); }
+});
+
+$("dc-form").addEventListener("submit", function (e) { e.preventDefault(); calcDC(); });
+$("ac-form").addEventListener("submit", function (e) { e.preventDefault(); calcAC(); });
+$("en-form").addEventListener("submit", function (e) { e.preventDefault(); calcEN(); });
+$("dc-reset").addEventListener("click", resetDC);
+$("ac-reset").addEventListener("click", resetAC);
+$("en-reset").addEventListener("click", resetEN);
+$("dc-list").addEventListener("change", onUnitChange);
+$("ac-list").addEventListener("change", onUnitChange);
+$("ac-phase").addEventListener("change", function () {
+  syncPhaseLabel();
+  if (LAST.ac) calcAC();   /* keep shown results consistent with the selected system */
+});
+</script>
+</body>
+</html>
