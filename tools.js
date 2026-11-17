@@ -69,8 +69,9 @@ window.STUDENT_TOOLS = [
     id: "power-calculator",
     name: "Power Calculator",
     category: "electrical",
-    status: "soon",
-    description: "Calculate electrical power, energy, and related values.",
-    keywords: "power watt energy electrical"
+    status: "available",
+    href: "tools/power-calculator.html",
+    description: "Calculate DC and AC power, power factor, energy use, and electricity cost.",
+    keywords: "power watt energy electrical kwh cost bill electricity price power factor ac dc three-phase apparent reactive"
   }
 ];
