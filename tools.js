@@ -36,9 +36,10 @@ window.STUDENT_TOOLS = [
     id: "number-system",
     name: "Number System Converter",
     category: "digital",
-    status: "soon",
-    description: "Convert between binary, decimal, and hexadecimal.",
-    keywords: "binary decimal hexadecimal hex convert"
+    status: "available",
+    href: "tools/number-system-converter.html",
+    description: "Convert between binary, octal, decimal, hexadecimal and any base from 2 to 36.",
+    keywords: "binary decimal hexadecimal hex octal base convert converter number system twos complement bits radix"
   },
   {
     id: "gpa",
