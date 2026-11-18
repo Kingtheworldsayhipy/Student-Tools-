@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free number system converter: binary, octal, decimal, hexadecimal and any base from 2 to 36. Supports negative numbers, fractions, two's complement, and step-by-step working.">
+<title>Number System Converter - Student Tools</title>
+<style>
+:root {
+  --navy: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --green-soft: #dcfce7;
+  --green: #166534;
+  --red: #b91c1c;
+  --red-soft: #fef2f2;
+  --amber-soft: #fffbeb;
+  --amber: #92400e;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .06);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+button, input, select { font-family: inherit; }
+:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  height: 64px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--white); border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy); text-decoration: none;
+}
+.brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+  background: var(--white);
+}
+.back:hover { background: var(--bg); border-color: #cbd5e1; }
+
+/* ---------- Page ---------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 8px; }
+.crumb { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--blue-dark); text-decoration: underline; }
+.crumb strong { color: var(--navy); }
+h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.2; color: var(--navy); }
+.lead { margin: 0 0 22px; color: var(--muted); font-size: 16px; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+.card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; min-width: 0;
+}
+.card + .card, .cols + .card { margin-top: 20px; }
+.cols .card + .card { margin-top: 0; }
+.card h2 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.card h3 { margin: 20px 0 8px; font-size: 15px; color: var(--navy); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 14px; }
+
+/* ---------- Form ---------- */
+.field { margin-top: 16px; }
+.field label, .lbl { display: block; font-weight: 700; font-size: 15px; color: var(--navy); }
+.sub { font-weight: 400; color: var(--muted); font-size: 13px; }
+.field > input[type="text"], .field > input[type="number"], .field > select {
+  width: 100%; margin-top: 7px; padding: 12px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #fff; color: var(--text);
+}
+.field > input.mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 18px; letter-spacing: .02em;
+}
+.field > select { height: 48px; padding: 0 10px; cursor: pointer; font-weight: 600; color: var(--navy); }
+.field > input:focus, .field > select:focus {
+  border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px #bfdbfe;
+}
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.check { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-weight: 600; font-size: 15px; color: var(--navy); cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--blue); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg); color: var(--navy); cursor: pointer;
+  font-size: 14px; font-weight: 600;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+.chip:hover { background: var(--blue-soft); border-color: #bfdbfe; }
+.btn {
+  padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line);
+  font-size: 14px; font-weight: 700; cursor: pointer; background: var(--white); color: var(--text);
+}
+.btn:hover { background: var(--bg); }
+.btn-clear { margin-top: 18px; }
+.error {
+  display: none; margin-top: 16px; padding: 12px 14px;
+  background: var(--red-soft); color: var(--red);
+  border: 1px solid #fecaca; border-radius: 8px; font-size: 15px;
+}
+.error.show { display: block; }
+.tc-err { margin-top: 12px; }
+
+/* ---------- Results ---------- */
+.placeholder {
+  margin-top: 14px; padding: 28px 16px; text-align: center;
+  background: var(--blue-soft); border-radius: 10px; color: var(--muted);
+}
+.res-list { display: grid; gap: 10px; margin-top: 14px; }
+.res-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white);
+}
+.res-row.src { border-color: #bfdbfe; background: var(--blue-soft); }
+.res-label {
+  grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--muted);
+}
+.res-val {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 20px; font-weight: 700; color: var(--navy); overflow-wrap: anywhere; word-break: break-all;
+}
+.copy {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--white);
+  color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; min-width: 68px;
+}
+.copy:hover { background: var(--bg); }
+.copy.done { background: var(--green-soft); color: var(--green); border-color: #bbf7d0; }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.tag.in { background: #dbeafe; color: var(--blue-dark); }
+.trunc {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px;
+  background: var(--amber-soft); color: var(--amber); border: 1px solid #fde68a;
+}
+.other-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.other-row select {
+  padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;
+  background: var(--bg); color: var(--navy); font-weight: 700; cursor: pointer;
+}
+
+/* ---------- Two's complement ---------- */
+.tc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+.tc-box { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); min-width: 0; }
+.tc-box .k { font-size: 13px; font-weight: 600; color: var(--muted); }
+.tc-box .v {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 18px; font-weight: 700; color: var(--navy); overflow-wrap: anywhere; word-break: break-all;
+}
+.tc-top { display: flex; align-items: end; gap: 14px; flex-wrap: wrap; }
+.tc-top .field { margin-top: 12px; min-width: 200px; }
+
+/* ---------- Steps ---------- */
+.steps { margin: 0; padding-left: 20px; }
+.steps li { margin-bottom: 14px; }
+.step-title { display: block; font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+.steps code, .code {
+  display: block; margin-top: 4px; padding: 8px 10px;
+  background: var(--blue-soft); border-radius: 8px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 14px; color: var(--navy); overflow-wrap: anywhere; white-space: pre-wrap;
+}
+.note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.step-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.step-head .field { margin-top: 8px; min-width: 220px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+td.num, th.num { text-align: right; }
+td.m { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; overflow-wrap: anywhere; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
+.ref td, .ref th { text-align: center; }
+
+.footer {
+  margin-top: 36px; padding: 22px 24px; text-align: center;
+  border-top: 1px solid var(--line); background: var(--white);
+  font-size: 14px; color: var(--muted);
+}
+.footer strong { color: var(--navy); }
+
+@media (max-width: 860px) {
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .cols .card + .card { margin-top: 0; }
+}
+@media (max-width: 520px) {
+  .header { padding: 0 12px; }
+  .back span { display: none; }
+  .wrap { padding: 20px 14px 8px; }
+  h1 { font-size: 25px; }
+  .card { padding: 18px; }
+  .two { grid-template-columns: 1fr; }
+  .res-val { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="../index.html">
+    <span class="brand-logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+    </span>
+    Student Tools
+  </a>
+  <a class="back" href="../index.html">← <span>Back to dashboard</span></a>
+</header>
+
+<main class="wrap">
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="../index.html">Student Tools</a> / Digital Logic / <strong>Number System Converter</strong>
+  </nav>
+  <h1>Number System Converter</h1>
+  <p class="lead">Convert between binary, octal, decimal, hexadecimal and any base from 2 to 36. Results update as you type.</p>
+
+  <div class="cols">
+    <!-- ================= INPUT ================= -->
+    <section class="card" aria-labelledby="inTitle">
+      <h2 id="inTitle">Input</h2>
+      <p class="hint">Type a number, then choose the base it is written in.</p>
+
+      <div class="field">
+        <label for="val">Number</label>
+        <input id="val" class="mono" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. 1010.101 or FF or -42">
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label for="from">From base</label>
+          <select id="from">
+            <option value="2">Binary (2)</option>
+            <option value="8">Octal (8)</option>
+            <option value="10" selected>Decimal (10)</option>
+            <option value="16">Hexadecimal (16)</option>
+            <option value="other">Other (2–36)…</option>
+          </select>
+        </div>
+        <div class="field" id="fromCustomWrap" hidden>
+          <label for="fromCustom">Base <span class="sub">(2–36)</span></label>
+          <input id="fromCustom" type="number" min="2" max="36" step="1" value="5" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fracDigits">Max digits after the point <span class="sub">(for fractions)</span></label>
+        <select id="fracDigits">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="16">16</option>
+          <option value="24">24</option>
+          <option value="32">32</option>
+        </select>
+      </div>
+
+      <label class="check"><input type="checkbox" id="group" checked> Group digits (e.g. 1111 1111)</label>
+
+      <div class="error" id="err" role="alert"></div>
+
+      <div class="field">
+        <span class="lbl">Try an example</span>
+        <div class="chips" id="chips"></div>
+      </div>
+      <button type="button" class="btn btn-clear" id="clear">Clear</button>
+    </section>
+
+    <!-- ================= RESULTS ================= -->
+    <section class="card" aria-labelledby="outTitle" aria-live="polite">
+      <h2 id="outTitle">Results</h2>
+      <div class="placeholder" id="placeholder">Type a number to see it in every base.</div>
+      <div id="out" hidden>
+        <div class="res-list" id="list"></div>
+        <div class="trunc" id="trunc" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= TWO'S COMPLEMENT ================= -->
+  <section class="card" aria-labelledby="tcTitle">
+    <h2 id="tcTitle">Two's complement</h2>
+    <p class="hint">How a whole number is stored in a computer with a fixed number of bits.</p>
+    <div class="tc-top">
+      <div class="field">
+        <label for="tcWidth">Bit width</label>
+        <select id="tcWidth">
+          <option value="auto" selected>Auto (smallest of 8 / 16 / 32 / 64)</option>
+          <option value="8">8-bit</option>
+          <option value="16">16-bit</option>
+          <option value="32">32-bit</option>
+          <option value="64">64-bit</option>
+        </select>
+      </div>
+    </div>
+    <div class="placeholder" id="tcPlaceholder">Enter a whole number to see its two's complement form.</div>
+    <div class="error tc-err" id="tcErr" role="alert"></div>
+    <div id="tcOut" hidden>
+      <div class="tc-grid">
+        <div class="tc-box"><div class="k">Bit width used</div><div class="v" id="tcW"></div></div>
+        <div class="tc-box"><div class="k">Binary</div><div class="v" id="tcBin"></div></div>
+        <div class="tc-box"><div class="k">Hexadecimal</div><div class="v" id="tcHex"></div></div>
+        <div class="tc-box"><div class="k">Same bits read as unsigned</div><div class="v" id="tcUns"></div></div>
+        <div class="tc-box"><div class="k">Range of this width</div><div class="v" id="tcRange"></div></div>
+        <div class="tc-box"><div class="k">Fewest bits that can hold it</div><div class="v" id="tcMin"></div></div>
+      </div>
+      <p class="note">Negative numbers: invert all bits of the positive value and add 1 (equivalently, add 2<sup>n</sup>).</p>
+    </div>
+  </section>
+
+  <!-- ================= STEPS ================= -->
+  <section class="card" aria-labelledby="stTitle">
+    <div class="step-head">
+      <div>
+        <h2 id="stTitle">How it was calculated</h2>
+        <p class="hint">Working for the number above, shown in the base you pick.</p>
+      </div>
+      <div class="field">
+        <label for="stTarget">Convert to</label>
+        <select id="stTarget">
+          <option value="auto" selected>Auto</option>
+          <option value="2">Binary (2)</option>
+          <option value="8">Octal (8)</option>
+          <option value="10">Decimal (10)</option>
+          <option value="16">Hexadecimal (16)</option>
+          <option value="other">Other base (chosen in Results)</option>
+        </select>
+      </div>
+    </div>
+    <div class="placeholder" id="stPlaceholder">Enter a number to see the steps.</div>
+    <ol class="steps" id="steps" hidden></ol>
+  </section>
+
+  <!-- ================= REFERENCE ================= -->
+  <section class="card" aria-labelledby="refTitle">
+    <h2 id="refTitle">Quick reference</h2>
+    <p class="hint">Digits 0 to 15 in the most common bases.</p>
+    <div class="tbl-wrap">
+      <table class="ref" id="ref"></table>
+    </div>
+    <p class="note">Digits above 9 use letters: A = 10, B = 11 … Z = 35. Bases 8 and 16 are shortcuts for binary: one octal digit = 3 bits, one hex digit = 4 bits.</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>Student Tools</strong> · Free tools for students · <a href="../index.html" style="color:inherit">Back to dashboard</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var MAX_DIGITS = 256;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function bigPow(b, e) { return BigInt(b) ** BigInt(e); }
+  function dig(v) { return DIGITS[Number(v)]; }
+
+  /* ---------- Parsing ---------- */
+  function currentBase() {
+    var f = $('from').value;
+    if (f !== 'other') return { base: Number(f) };
+    var raw = $('fromCustom').value.trim();
+    if (!/^\d+$/.test(raw)) return { error: 'Enter a whole number from 2 to 36 for the base.' };
+    var b = Number(raw);
+    if (b < 2 || b > 36) return { error: 'The base must be between 2 and 36.' };
+    return { base: b };
+  }
+
+  function allowed(base) { return DIGITS.slice(0, base).split('').join(' '); }
+
+  function parse(raw, base) {
+    var s = raw.replace(/[\s_]/g, '').replace(/[−–—]/g, '-');
+    if (!s) return { empty: true };
+    var neg = false;
+    if (s[0] === '-' || s[0] === '+') { neg = s[0] === '-'; s = s.slice(1); }
+    var prefix = { 16: '0X', 2: '0B', 8: '0O' }[base];
+    if (prefix && s.toUpperCase().indexOf(prefix) === 0) s = s.slice(2);
+    if (s.indexOf(',') !== -1) return { error: 'Use a dot (.) as the decimal point, not a comma.' };
+    if (!s) return { error: 'Enter some digits after the sign or prefix.' };
+    var parts = s.split('.');
+    if (parts.length > 2) return { error: 'A number can have only one decimal point.' };
+    var ip = parts[0], fp = parts.length === 2 ? parts[1] : '';
+    if (!ip && !fp) return { error: 'Enter at least one digit.' };
+    if (ip.length + fp.length > MAX_DIGITS) return { error: 'That number is too long. The limit is ' + MAX_DIGITS + ' digits.' };
+    var all = (ip + fp).toUpperCase();
+    var N = 0n, B = BigInt(base);
+    for (var i = 0; i < all.length; i++) {
+      var d = DIGITS.indexOf(all[i]);
+      if (d < 0 || d >= base) {
+        return { error: '"' + esc(all[i]) + '" is not a valid digit in base ' + base + '. Allowed digits: ' + allowed(base) + '.' };
+      }
+      N = N * B + BigInt(d);
+    }
+    var D = bigPow(base, fp.length);
+    if (N === 0n) neg = false;
+    return {
+      neg: neg, N: N, D: D, base: base,
+      I: N / D, R: N % D,
+      ipDigits: ip.toUpperCase(), fpDigits: fp.toUpperCase()
+    };
+  }
+
+  /* ---------- Conversion ---------- */
+  function convert(p, b, maxFrac) {
+    var intStr = p.I.toString(b).toUpperCase();
+    var frac = '', trace = [], r = p.R, truncated = false;
+    var Bb = BigInt(b);
+    while (r > 0n) {
+      if (frac.length >= maxFrac) { truncated = true; break; }
+      var prod = r * Bb;
+      var d = prod / p.D;
+      var rem = prod % p.D;
+      frac += dig(d);
+      trace.push({ r: r, prod: prod, d: d, rem: rem });
+      r = rem;
+    }
+    return { neg: p.neg, int: intStr, frac: frac, truncated: truncated, trace: trace };
+  }
+
+  function groupStr(s, size, fromLeft) {
+    if (!size || s.length <= size) return s;
+    var out = [], i;
+    if (fromLeft) {
+      for (i = 0; i < s.length; i += size) out.push(s.slice(i, i + size));
+    } else {
+      i = s.length;
+      while (i > 0) { out.unshift(s.slice(Math.max(0, i - size), i)); i -= size; }
+    }
+    return out.join(' ');
+  }
+  function groupSize(b) { return b === 2 ? 4 : b === 16 ? 4 : b === 8 ? 3 : 0; }
+
+  function rawString(c) { return (c.neg ? '-' : '') + c.int + (c.frac ? '.' + c.frac : ''); }
+  function shownString(c, base, doGroup) {
+    var g = doGroup ? groupSize(base) : 0;
+    return (c.neg ? '-' : '') + groupStr(c.int, g, false) +
+      (c.frac ? '.' + groupStr(c.frac, g, true) : '') + (c.truncated ? '…' : '');
+  }
+
+  /* ---------- State ---------- */
+  var state = { parsed: null, otherBase: 36 };
+
+  /* ---------- Render: results ---------- */
+  var BASE_NAMES = { 2: 'Binary (base 2)', 8: 'Octal (base 8)', 10: 'Decimal (base 10)', 16: 'Hexadecimal (base 16)' };
+
+  function otherSelectHtml() {
+    var h = '<select id="otherBase" aria-label="Choose base for the last result">';
+    for (var b = 2; b <= 36; b++) {
+      h += '<option value="' + b + '"' + (b === state.otherBase ? ' selected' : '') + '>' + b + '</option>';
+    }
+    return h + '</select>';
+  }
+
+  function renderResults(p) {
+    var maxFrac = Number($('fracDigits').value);
+    var doGroup = $('group').checked;
+    var rows = [2, 8, 10, 16, 'other'];
+    var html = '', anyTrunc = false, truncBases = [];
+    rows.forEach(function (key) {
+      var b = key === 'other' ? state.otherBase : key;
+      var c = convert(p, b, maxFrac);
+      if (c.truncated) { anyTrunc = true; truncBases.push(b); }
+      var isSrc = key !== 'other' && b === p.base;
+      var label = key === 'other'
+        ? '<span class="other-row">Other base: ' + otherSelectHtml() + '</span>'
+        : esc(BASE_NAMES[b]);
+      html += '<div class="res-row' + (isSrc ? ' src' : '') + '" data-key="' + key + '" data-base="' + b + '" data-raw="' + esc(rawString(c)) + '">' +
+        '<div class="res-label">' + label + (isSrc ? '<span class="tag in">input</span>' : '') + '</div>' +
+        '<div class="res-val">' + esc(shownString(c, b, doGroup)) + '</div>' +
+        '<button type="button" class="copy" data-copy="' + key + '" aria-label="Copy ' + esc(key === 'other' ? 'base ' + b : BASE_NAMES[b]) + ' result">Copy</button>' +
+        '</div>';
+    });
+    $('list').innerHTML = html;
+    var t = $('trunc');
+    if (anyTrunc) {
+      t.hidden = false;
+      t.textContent = 'This fraction does not end within ' + maxFrac + ' digits in base ' + truncBases.join(', ') +
+        '. It was cut off (not rounded) where you see "…". Increase "Max digits after the point" for more precision.';
+    } else { t.hidden = true; t.textContent = ''; }
+  }
+
+  /* ---------- Render: two's complement ---------- */
+  function bitsNeeded(v) {
+    // fewest w >= 1 with -2^(w-1) <= v <= 2^(w-1)-1
+    var w = 1;
+    while (true) {
+      var lim = 1n << BigInt(w - 1);
+      if (v >= -lim && v <= lim - 1n) return w;
+      w++;
+    }
+  }
+  function renderTwos(p) {
+    var ph = $('tcPlaceholder'), out = $('tcOut'), err = $('tcErr');
+    err.classList.remove('show'); err.textContent = '';
+    if (!p) { ph.hidden = false; ph.textContent = 'Enter a whole number to see its two’s complement form.'; out.hidden = true; return; }
+    if (p.R !== 0n) {
+      ph.hidden = false; ph.textContent = 'Two’s complement is for whole numbers only. Remove the fractional part to see it.';
+      out.hidden = true; return;
+    }
+    var v = p.neg ? -p.I : p.I;
+    var sel = $('tcWidth').value, w;
+    function fits(width) {
+      var lim = 1n << BigInt(width - 1);
+      return v >= -lim && v <= lim - 1n;
+    }
+    if (sel === 'auto') {
+      w = [8, 16, 32, 64].filter(fits)[0];
+      if (!w) {
+        ph.hidden = true; out.hidden = true;
+        err.textContent = 'This number needs ' + bitsNeeded(v) + ' bits, which is more than 64. Fixed widths up to 64 bits are supported here.';
+        err.classList.add('show'); return;
+      }
+    } else {
+      w = Number(sel);
+      if (!fits(w)) {
+        var lim = 1n << BigInt(w - 1);
+        ph.hidden = true; out.hidden = true;
+        err.textContent = v.toString() + ' does not fit in ' + w + ' bits. The range is ' + (-lim).toString() + ' to ' + (lim - 1n).toString() + '.';
+        err.classList.add('show'); return;
+      }
+    }
+    ph.hidden = true; out.hidden = false;
+    var W = BigInt(w);
+    var u = ((v % (1n << W)) + (1n << W)) % (1n << W);
+    var bin = u.toString(2).padStart(w, '0');
+    var hex = u.toString(16).toUpperCase().padStart(w / 4, '0');
+    var lim2 = 1n << (W - 1n);
+    $('tcW').textContent = w + ' bits';
+    $('tcBin').textContent = groupStr(bin, 4, false);
+    $('tcHex').textContent = hex;
+    $('tcUns').textContent = u.toString();
+    $('tcRange').textContent = (-lim2).toString() + ' to ' + (lim2 - 1n).toString();
+    $('tcMin').textContent = bitsNeeded(v) + ' bits';
+    $('tcBin').setAttribute('data-raw', bin);
+  }
+
+  /* ---------- Render: steps ---------- */
+  function termList(p) {
+    var terms = [], ip = p.ipDigits, fp = p.fpDigits, i;
+    for (i = 0; i < ip.length; i++) terms.push({ ch: ip[i], e: ip.length - 1 - i });
+    for (i = 0; i < fp.length; i++) terms.push({ ch: fp[i], e: -(i + 1) });
+    return terms;
+  }
+  function termText(t, base) {
+    var d = DIGITS.indexOf(t.ch);
+    return (d > 9 ? t.ch + '(' + d + ')' : String(d)) + ' × ' + base + '^' + t.e;
+  }
+  function tableHtml(head, rows) {
+    var h = '<div class="tbl-wrap"><table><thead><tr>';
+    head.forEach(function (x) { h += '<th>' + esc(x) + '</th>'; });
+    h += '</tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr>';
+      r.forEach(function (x) { h += '<td class="m">' + esc(x) + '</td>'; });
+      h += '</tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+
+  function renderSteps(p) {
+    var ph = $('stPlaceholder'), ol = $('steps');
+    if (!p) { ph.hidden = false; ol.hidden = true; ol.innerHTML = ''; return; }
+    ph.hidden = true; ol.hidden = false;
+
+    var sel = $('stTarget').value, t;
+    if (sel === 'auto') t = p.base === 10 ? 2 : 10;
+    else if (sel === 'other') t = state.otherBase;
+    else t = Number(sel);
+    var maxFrac = Number($('fracDigits').value);
+    var html = '';
+    var src = p.base;
+
+    if (t === src) {
+      ol.innerHTML = '<li><span class="step-title">Same base</span>The number is already written in base ' + src +
+        ', so no conversion is needed. Pick a different "Convert to" base to see the working.</li>';
+      return;
+    }
+
+    var finalC = convert(p, t, maxFrac);
+    var sign = p.neg ? '-' : '';
+
+    // Step 1: sign
+    var n = 1;
+    if (p.neg) {
+      html += '<li><span class="step-title">Set the sign aside</span>The number is negative. Convert its absolute value, then put the minus sign back at the end.</li>';
+    }
+
+    // Step: expand to decimal when source is not 10
+    var needExpand = src !== 10 && t === 10;
+    if (src !== 10 && t === 10) {
+      var terms = termList(p);
+      var txt;
+      if (terms.length > 24) {
+        txt = terms.slice(0, 12).map(function (x) { return termText(x, src); }).join('\n+ ') +
+          '\n+ … (' + (terms.length - 16) + ' more terms) …\n+ ' +
+          terms.slice(-4).map(function (x) { return termText(x, src); }).join('\n+ ');
+      } else {
+        txt = terms.map(function (x) { return termText(x, src); }).join('\n+ ');
+      }
+      html += '<li><span class="step-title">Multiply each digit by its place value (power of ' + src + ')</span>' +
+        'Digits left of the point have powers 0, 1, 2 … counting from the point; digits to the right have negative powers.' +
+        '<code>' + esc(txt) + '</code>' +
+        '<code>= ' + esc(shownString(finalC, 10, false)) + '</code></li>';
+    } else if (src !== 10) {
+      // go via decimal for non-decimal source -> non-decimal target
+      var dec = convert(p, 10, maxFrac);
+      var terms2 = termList(p);
+      var txt2 = terms2.length > 16
+        ? terms2.slice(0, 8).map(function (x) { return termText(x, src); }).join('\n+ ') + '\n+ … (' + (terms2.length - 12) + ' more terms) …\n+ ' +
+          terms2.slice(-4).map(function (x) { return termText(x, src); }).join('\n+ ')
+        : terms2.map(function (x) { return termText(x, src); }).join('\n+ ');
+      html += '<li><span class="step-title">First, convert to decimal</span>Multiply each digit by its place value (power of ' + src + ').' +
+        '<code>' + esc(txt2) + '</code><code>= ' + esc(shownString(dec, 10, false)) + '</code>' +
+        (dec.truncated ? '<span class="note">This decimal value is cut off at ' + maxFrac + ' digits; the final answer below is computed from the exact value.</span>' : '') +
+        '</li>';
+    }
+
+    // Step: integer part by repeated division (skip when target is decimal and source not decimal: already done)
+    if (t !== 10 || src === 10) {
+      var I = p.I, Bt = BigInt(t);
+      var hasInt = I !== 0n;
+      if (!hasInt) {
+        html += '<li><span class="step-title">Integer part</span>The integer part is 0, so its digit in base ' + t + ' is 0.</li>';
+      } else {
+        var rows = [], cur = I, remDigits = '';
+        while (cur > 0n) {
+          var q = cur / Bt, r = cur % Bt;
+          rows.push([cur.toString() + ' ÷ ' + t, q.toString(), r.toString() + (r > 9n ? ' (' + dig(r) + ')' : '')]);
+          remDigits = dig(r) + remDigits;
+          cur = q;
+        }
+        if (rows.length > 64) {
+          html += '<li><span class="step-title">Integer part: divide by ' + t + ' repeatedly</span>' +
+            'This takes ' + rows.length + ' divisions, too many to list. Reading the remainders from last to first gives <code>' + esc(finalC.int) + '</code></li>';
+        } else {
+          html += '<li><span class="step-title">Integer part: divide by ' + t + ' repeatedly</span>' +
+            'Keep dividing the quotient by ' + t + ' until it reaches 0. The remainders, read from bottom to top, are the digits.' +
+            tableHtml(['Division', 'Quotient', 'Remainder'], rows) +
+            '<code>' + esc(I.toString()) + ' in base ' + t + ' = ' + esc(finalC.int) + '</code></li>';
+        }
+      }
+    }
+
+    // Step: fractional part by repeated multiplication
+    if (p.R !== 0n && (t !== 10 || src === 10)) {
+      var tr = finalC.trace, shown = tr.slice(0, 20);
+      var frows = shown.map(function (x, i) {
+        return [String(i + 1), x.r + '/' + p.D + ' × ' + t + ' = ' + x.prod + '/' + p.D, x.d.toString() + (x.d > 9n ? ' (' + dig(x.d) + ')' : ''), x.rem + '/' + p.D];
+      });
+      html += '<li><span class="step-title">Fractional part: multiply by ' + t + ' repeatedly</span>' +
+        'Multiply the fraction by ' + t + '. The whole-number part is the next digit; keep the remainder and repeat until it is 0.' +
+        tableHtml(['#', 'Fraction × ' + t, 'Digit', 'Remaining'], frows) +
+        (tr.length > shown.length ? '<span class="note">Showing the first ' + shown.length + ' of ' + tr.length + ' steps.</span>' : '') +
+        (finalC.truncated ? '<span class="note">The remainder never reached 0 within ' + maxFrac + ' digits, so the fraction was cut off (not rounded).</span>' : '') +
+        '</li>';
+    }
+
+    // Step: combine
+    html += '<li><span class="step-title">Result</span><code>' + esc(sign + shownString({ neg: false, int: finalC.int, frac: finalC.frac, truncated: finalC.truncated }, t, $('group').checked)) +
+      ' (base ' + t + ')</code>' + (p.neg ? '<span class="note">The minus sign is put back in front.</span>' : '') + '</li>';
+
+    // Tip: shortcut for powers of two
+    var pow2 = { 2: 1, 8: 3, 16: 4 };
+    if (pow2[src] && pow2[t] && (src === 2 || t === 2) && src !== t) {
+      var tip;
+      if (src === 2) {
+        var k = pow2[t];
+        var bits = p.ipDigits.replace(/^0+(?=.)/, '');
+        if (bits.length <= 64 && bits) {
+          var pad = bits.padStart(Math.ceil(bits.length / k) * k, '0');
+          var grp = groupStr(pad, k, true).split(' ');
+          tip = 'Shortcut: group the bits in ' + k + 's from the right, then convert each group.<code>' +
+            esc(grp.join(' ') + '  →  ' + grp.map(function (g) { return dig(parseInt(g, 2)); }).join(' ')) + '</code>';
+        } else tip = 'Shortcut: group the bits in ' + k + 's from the right and convert each group to one digit.';
+      } else {
+        var kk = pow2[src];
+        var ds = p.ipDigits.replace(/^0+(?=.)/, '');
+        if (ds.length <= 64 && ds) {
+          tip = 'Shortcut: replace each digit with ' + kk + ' bits.<code>' +
+            esc(ds.split('').map(function (c) { return c + ' = ' + DIGITS.indexOf(c).toString(2).padStart(kk, '0'); }).join('\n')) + '</code>';
+        } else tip = 'Shortcut: replace each digit with ' + kk + ' bits.';
+      }
+      html += '<li><span class="step-title">Shortcut (integer part)</span>' + tip + '</li>';
+    }
+
+    ol.innerHTML = html;
+  }
+
+  /* ---------- Main update ---------- */
+  function update() {
+    var errEl = $('err');
+    var cb = currentBase();
+    $('fromCustomWrap').hidden = $('from').value !== 'other';
+    function fail(msg) {
+      errEl.innerHTML = msg; errEl.classList.add('show');
+      $('out').hidden = true; $('placeholder').hidden = false;
+      $('placeholder').textContent = 'Fix the input to see results.';
+      state.parsed = null; renderTwos(null); renderSteps(null);
+    }
+    errEl.classList.remove('show'); errEl.textContent = '';
+    if (cb.error) { fail(esc(cb.error)); return; }
+    var raw = $('val').value;
+    var p = parse(raw, cb.base);
+    if (p.empty) {
+      $('out').hidden = true; $('placeholder').hidden = false;
+      $('placeholder').textContent = 'Type a number to see it in every base.';
+      state.parsed = null; renderTwos(null); renderSteps(null); return;
+    }
+    if (p.error) { fail(p.error); return; }
+    state.parsed = p;
+    $('placeholder').hidden = true; $('out').hidden = false;
+    renderResults(p); renderTwos(p); renderSteps(p);
+  }
+
+  /* ---------- Copy ---------- */
+  function copyText(text, btn) {
+    function done() {
+      var old = btn.textContent;
+      btn.textContent = 'Copied!'; btn.classList.add('done');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1200);
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = 'Press Ctrl+C'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else fallback();
+  }
+
+  /* ---------- Setup ---------- */
+  var EXAMPLES = [
+    { t: '255', b: '10' }, { t: '11111111', b: '2' }, { t: 'FF', b: '16' },
+    { t: '1010.101', b: '2' }, { t: '-42', b: '10' }, { t: '0.1', b: '10' }
+  ];
+  var BNAME = { '2': 'bin', '8': 'oct', '10': 'dec', '16': 'hex' };
+  $('chips').innerHTML = EXAMPLES.map(function (e, i) {
+    return '<button type="button" class="chip" data-i="' + i + '" title="Base ' + e.b + '">' + esc(e.t) + ' <small>' + BNAME[e.b] + '</small></button>';
+  }).join('');
+  $('chips').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.chip'); if (!b) return;
+    var e = EXAMPLES[Number(b.getAttribute('data-i'))];
+    $('from').value = e.b; $('val').value = e.t; update();
+  });
+
+  // Reference table
+  (function () {
+    var h = '<thead><tr><th>Decimal</th><th>Binary</th><th>Octal</th><th>Hex</th></tr></thead><tbody>';
+    for (var i = 0; i < 16; i++) {
+      h += '<tr><td>' + i + '</td><td>' + i.toString(2).padStart(4, '0') + '</td><td>' + i.toString(8) + '</td><td>' + i.toString(16).toUpperCase() + '</td></tr>';
+    }
+    $('ref').innerHTML = h + '</tbody>';
+  })();
+
+  $('val').addEventListener('input', update);
+  $('from').addEventListener('change', update);
+  $('fromCustom').addEventListener('input', update);
+  $('fracDigits').addEventListener('change', update);
+  $('group').addEventListener('change', update);
+  $('tcWidth').addEventListener('change', function () { renderTwos(state.parsed); });
+  $('stTarget').addEventListener('change', function () { renderSteps(state.parsed); });
+  $('clear').addEventListener('click', function () { $('val').value = ''; update(); $('val').focus(); });
+
+  $('list').addEventListener('change', function (ev) {
+    if (ev.target.id === 'otherBase') {
+      state.otherBase = Number(ev.target.value);
+      if (state.parsed) { renderResults(state.parsed); renderSteps(state.parsed); }
+      var s = $('otherBase'); if (s) s.focus();
+    }
+  });
+  $('list').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('.copy'); if (!btn) return;
+    var row = btn.closest('.res-row');
+    copyText(row.getAttribute('data-raw'), btn);
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
