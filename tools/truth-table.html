@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free truth table generator for Boolean expressions. Supports AND, OR, NOT, XOR, NAND, NOR, XNOR, implication and equivalence. Shows intermediate columns, minterms, maxterms, SOP and POS forms, and checks if two expressions are equivalent.">
+<title>Truth Table Generator - Student Tools</title>
+<style>
+:root {
+  --navy: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --green-soft: #dcfce7;
+  --green: #166534;
+  --red: #b91c1c;
+  --red-soft: #fef2f2;
+  --amber-soft: #fffbeb;
+  --amber: #92400e;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 4px 14px rgba(15, 23, 42, .06);
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+button, input, select { font-family: inherit; }
+:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+/* ---------- Header ---------- */
+.header {
+  position: sticky; top: 0; z-index: 20;
+  height: 64px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--white); border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; color: var(--navy); text-decoration: none;
+}
+.brand-logo {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px;
+  color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+  background: var(--white);
+}
+.back:hover { background: var(--bg); border-color: #cbd5e1; }
+
+/* ---------- Page ---------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 8px; }
+.crumb { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--blue-dark); text-decoration: underline; }
+.crumb strong { color: var(--navy); }
+h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.2; color: var(--navy); }
+.lead { margin: 0 0 22px; color: var(--muted); font-size: 16px; }
+
+.card {
+  background: var(--white); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 24px; min-width: 0;
+}
+.card + .card { margin-top: 20px; }
+.card h2 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.card h3 { margin: 20px 0 8px; font-size: 15px; color: var(--navy); }
+.hint { margin: 0 0 4px; color: var(--muted); font-size: 14px; }
+
+/* ---------- Form ---------- */
+.field { margin-top: 16px; }
+.field label, .lbl { display: block; font-weight: 700; font-size: 15px; color: var(--navy); }
+.sub { font-weight: 400; color: var(--muted); font-size: 13px; }
+.field > input[type="text"], .field > select {
+  width: 100%; margin-top: 7px; padding: 12px;
+  border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #fff; color: var(--text);
+}
+.field > input.mono { font-family: var(--mono); font-size: 18px; letter-spacing: .02em; }
+.field > select { height: 48px; padding: 0 10px; cursor: pointer; font-weight: 600; color: var(--navy); }
+.field > input:focus, .field > select:focus { border-color: var(--blue); outline: none; box-shadow: 0 0 0 3px #bfdbfe; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 14px; }
+.check { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-weight: 600; font-size: 15px; color: var(--navy); cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--blue); }
+
+.ops { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.op {
+  padding: 7px 11px; min-width: 40px; border: 1px solid #cbd5e1; border-radius: 8px;
+  background: var(--bg); color: var(--navy); cursor: pointer;
+  font-family: var(--mono); font-size: 14px; font-weight: 700;
+}
+.op:hover { background: var(--blue-soft); border-color: #bfdbfe; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg); color: var(--navy); cursor: pointer;
+  font-size: 14px; font-weight: 600; font-family: var(--mono);
+}
+.chip:hover { background: var(--blue-soft); border-color: #bfdbfe; }
+.btn {
+  padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line);
+  font-size: 14px; font-weight: 700; cursor: pointer; background: var(--white); color: var(--text);
+}
+.btn:hover { background: var(--bg); }
+.btn.done { background: var(--green-soft); color: var(--green); border-color: #bbf7d0; }
+.error {
+  display: none; margin-top: 16px; padding: 12px 14px;
+  background: var(--red-soft); color: var(--red);
+  border: 1px solid #fecaca; border-radius: 8px; font-size: 15px;
+}
+.error.show { display: block; }
+.error code {
+  display: block; margin-top: 8px; padding: 6px 8px; background: #fff; border-radius: 6px;
+  font-family: var(--mono); font-size: 14px; white-space: pre; overflow-x: auto; color: var(--navy);
+}
+
+/* ---------- Results ---------- */
+.placeholder {
+  margin-top: 14px; padding: 28px 16px; text-align: center;
+  background: var(--blue-soft); border-radius: 10px; color: var(--muted);
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
+.box { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); min-width: 0; }
+.box .k { font-size: 13px; font-weight: 600; color: var(--muted); }
+.box .v { font-size: 18px; font-weight: 800; color: var(--navy); overflow-wrap: anywhere; }
+.box.good { background: var(--green-soft); border-color: #bbf7d0; } .box.good .v { color: var(--green); }
+.box.bad { background: var(--red-soft); border-color: #fecaca; } .box.bad .v { color: var(--red); }
+.box.info { background: var(--blue-soft); border-color: #bfdbfe; } .box.info .v { color: var(--blue-dark); }
+.expr-show {
+  margin-top: 14px; padding: 10px 12px; background: var(--blue-soft); border-radius: 8px;
+  font-family: var(--mono); font-size: 15px; color: var(--navy); overflow-wrap: anywhere;
+}
+.toolrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+.tbl-wrap {
+  margin-top: 10px; overflow: auto; max-height: 560px;
+  border: 1px solid var(--line); border-radius: 10px; -webkit-overflow-scrolling: touch;
+}
+table.tt { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 15px; }
+table.tt th, table.tt td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.tt thead th {
+  position: sticky; top: 0; z-index: 1; background: #fff;
+  font-family: var(--mono); font-size: 14px; color: var(--navy); border-bottom: 2px solid #cbd5e1;
+}
+table.tt th.var { background: #f1f5f9; }
+table.tt th.mid { color: var(--muted); font-weight: 600; }
+table.tt th.fin { background: var(--blue-soft); color: var(--blue-dark); }
+table.tt td { font-family: var(--mono); font-weight: 700; color: var(--navy); }
+table.tt td.var { background: #f8fafc; }
+table.tt td.mid { color: var(--muted); font-weight: 600; }
+table.tt td.fin { background: var(--blue-soft); }
+table.tt td.fin.t { color: var(--green); }
+table.tt td.fin.f { color: var(--red); }
+table.tt td.sep, table.tt th.sep { border-right: 2px solid #cbd5e1; }
+table.tt tr.diff td { background: var(--amber-soft); }
+table.tt tr:last-child td { border-bottom: 0; }
+.note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+
+.form-row { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.form-row .k { font-size: 13px; font-weight: 700; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.form-row .v { margin-top: 4px; font-family: var(--mono); font-size: 16px; color: var(--navy); overflow-wrap: anywhere; word-break: break-word; }
+.mini {
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+  font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer;
+}
+.mini:hover { background: var(--bg); }
+.mini.done { background: var(--green-soft); color: var(--green); }
+
+table.ref { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.ref th, table.ref td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+table.ref th { color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap; }
+table.ref td.m { font-family: var(--mono); }
+table.ref.center th, table.ref.center td { text-align: center; }
+.ref-wrap { overflow-x: auto; margin-top: 8px; }
+.two-col { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+ol.prec { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
+ol.prec li { margin-bottom: 4px; }
+
+.footer {
+  margin-top: 36px; padding: 22px 24px; text-align: center;
+  border-top: 1px solid var(--line); background: var(--white);
+  font-size: 14px; color: var(--muted);
+}
+.footer strong { color: var(--navy); }
+
+@media (max-width: 860px) {
+  .two-col { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .header { padding: 0 12px; }
+  .back span { display: none; }
+  .wrap { padding: 20px 14px 8px; }
+  h1 { font-size: 25px; }
+  .card { padding: 18px; }
+  table.tt th, table.tt td { padding: 7px 9px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="../index.html">
+    <span class="brand-logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+    </span>
+    Student Tools
+  </a>
+  <a class="back" href="../index.html">← <span>Back to dashboard</span></a>
+</header>
+
+<main class="wrap">
+  <nav class="crumb" aria-label="Breadcrumb">
+    <a href="../index.html">Student Tools</a> / Digital Logic / <strong>Truth Table Generator</strong>
+  </nav>
+  <h1>Truth Table Generator</h1>
+  <p class="lead">Type a Boolean expression and get its truth table instantly, with minterms, SOP/POS forms, and an equivalence check.</p>
+
+  <!-- ================= INPUT ================= -->
+  <section class="card" aria-labelledby="inTitle">
+    <h2 id="inTitle">Expression</h2>
+    <p class="hint">Use words (AND, OR, NOT, XOR), symbols (&amp; | ! ^ + * ' -&gt;), or write letters side by side for AND (AB means A AND B).</p>
+
+    <div class="field">
+      <label for="expr">Boolean expression</label>
+      <input id="expr" class="mono" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. (A OR B) AND NOT C" value="(A OR B) AND NOT C">
+    </div>
+
+    <div class="ops" id="ops" aria-label="Insert operator">
+      <button type="button" class="op" data-ins=" AND ">AND</button>
+      <button type="button" class="op" data-ins=" OR ">OR</button>
+      <button type="button" class="op" data-ins="NOT ">NOT</button>
+      <button type="button" class="op" data-ins=" XOR ">XOR</button>
+      <button type="button" class="op" data-ins=" NAND ">NAND</button>
+      <button type="button" class="op" data-ins=" NOR ">NOR</button>
+      <button type="button" class="op" data-ins=" XNOR ">XNOR</button>
+      <button type="button" class="op" data-ins=" -&gt; ">→</button>
+      <button type="button" class="op" data-ins=" &lt;-&gt; ">↔</button>
+      <button type="button" class="op" data-ins="(">(</button>
+      <button type="button" class="op" data-ins=")">)</button>
+    </div>
+
+    <div class="field">
+      <label for="expr2">Compare with another expression <span class="sub">(optional, checks if they are equivalent)</span></label>
+      <input id="expr2" class="mono" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. NOT A OR NOT B">
+    </div>
+
+    <div class="error" id="err" role="alert"></div>
+
+    <div class="opts">
+      <div class="field">
+        <label for="optShow">Show values as</label>
+        <select id="optShow"><option value="01" selected>1 / 0</option><option value="TF">T / F</option></select>
+      </div>
+      <div class="field">
+        <label for="optOrder">Row order</label>
+        <select id="optOrder"><option value="asc" selected>0 first (000, 001, …)</option><option value="desc">1 first (111, 110, …)</option></select>
+      </div>
+      <div class="field">
+        <label for="optNote">Notation in headings</label>
+        <select id="optNote"><option value="sym" selected>Symbols (∧ ∨ ¬)</option><option value="word">Words (AND OR NOT)</option></select>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="optMid" checked> Show intermediate columns (sub-expressions)</label>
+
+    <div class="field">
+      <span class="lbl">Try an example</span>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="toolrow"><button type="button" class="btn" id="clear">Clear</button></div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section class="card" aria-labelledby="outTitle" aria-live="polite">
+    <h2 id="outTitle">Truth table</h2>
+    <div class="placeholder" id="placeholder">Type an expression to see its truth table.</div>
+    <div id="out" hidden>
+      <div class="expr-show" id="exprShow"></div>
+      <div class="stats" id="stats"></div>
+      <div class="toolrow">
+        <p class="note" style="margin:0" id="tblNote"></p>
+        <button type="button" class="btn" id="copyTable">Copy table</button>
+      </div>
+      <div class="tbl-wrap"><table class="tt" id="tt"></table></div>
+    </div>
+  </section>
+
+  <!-- ================= CANONICAL FORMS ================= -->
+  <section class="card" aria-labelledby="cfTitle" id="cfCard" hidden>
+    <h2 id="cfTitle">Minterms, maxterms and canonical forms</h2>
+    <p class="hint">Row numbers count in binary with the first variable as the most significant bit.</p>
+    <div id="cf"></div>
+  </section>
+
+  <!-- ================= REFERENCE ================= -->
+  <section class="card" aria-labelledby="refTitle">
+    <h2 id="refTitle">Operators and quick reference</h2>
+    <div class="two-col">
+      <div>
+        <p class="hint">Any of these spellings work.</p>
+        <div class="ref-wrap">
+          <table class="ref" id="opTable"></table>
+        </div>
+        <p class="note">Constants: 0, 1, TRUE, FALSE. Variables are single letters A–Z (case-insensitive). Put spaces around words such as AND, OR so they are not read as separate letters.</p>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Order of operations</h3>
+        <ol class="prec">
+          <li>Parentheses ( )</li>
+          <li>NOT (also A')</li>
+          <li>AND, NAND (also letters side by side)</li>
+          <li>XOR, XNOR</li>
+          <li>OR, NOR</li>
+          <li>Implication (→), right to left</li>
+          <li>Equivalence (↔)</li>
+        </ol>
+        <p class="note">When unsure, add parentheses.</p>
+      </div>
+    </div>
+    <h3>Basic gates</h3>
+    <div class="ref-wrap"><table class="ref center" id="gates"></table></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>Student Tools</strong> · Free tools for students · <a href="../index.html" style="color:inherit">Back to dashboard</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var MAXV = 8;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function perr(msg, pos) { var e = new Error(msg); e.pos = pos; e.isParse = true; return e; }
+
+  /* ---------- Tokenizer ---------- */
+  var SYMBOLS = [
+    [/^(<->|<=>|↔|⇔)/, 'OP', 'IFF'],
+    [/^(->|=>|→|⇒)/, 'OP', 'IMP'],
+    [/^(&&|&|\*|\.|·|∧|•)/, 'OP', 'AND'],
+    [/^(\|\||\||\+|∨)/, 'OP', 'OR'],
+    [/^(\^|⊕|⊻)/, 'OP', 'XOR'],
+    [/^⊼/, 'OP', 'NAND'],
+    [/^⊽/, 'OP', 'NOR'],
+    [/^⊙/, 'OP', 'XNOR'],
+    [/^(!|~|¬)/, 'NOT', null],
+    [/^('|′|’)/, 'PRIME', null],
+    [/^[(\[{]/, 'LP', null],
+    [/^[)\]}]/, 'RP', null]
+  ];
+  var WORDS = {
+    AND: ['OP', 'AND'], OR: ['OP', 'OR'], XOR: ['OP', 'XOR'], NAND: ['OP', 'NAND'],
+    NOR: ['OP', 'NOR'], XNOR: ['OP', 'XNOR'], IMPLIES: ['OP', 'IMP'], IFF: ['OP', 'IFF'],
+    NOT: ['NOT', null], TRUE: ['CONST', 1], FALSE: ['CONST', 0]
+  };
+
+  function tokenize(src) {
+    var toks = [], i = 0, m, k, hit;
+    while (i < src.length) {
+      var c = src[i];
+      if (/\s/.test(c)) { i++; continue; }
+      var rest = src.slice(i);
+      hit = false;
+      for (k = 0; k < SYMBOLS.length; k++) {
+        m = SYMBOLS[k][0].exec(rest);
+        if (m) {
+          toks.push({ t: SYMBOLS[k][1], v: SYMBOLS[k][2], p: i, text: m[0] });
+          i += m[0].length; hit = true; break;
+        }
+      }
+      if (hit) continue;
+      if (c === '0' || c === '1') { toks.push({ t: 'CONST', v: Number(c), p: i, text: c }); i++; continue; }
+      m = /^[A-Za-z]+/.exec(rest);
+      if (m) {
+        var up = m[0].toUpperCase();
+        if (WORDS[up]) {
+          toks.push({ t: WORDS[up][0], v: WORDS[up][1], p: i, text: m[0] });
+        } else {
+          for (k = 0; k < m[0].length; k++) toks.push({ t: 'VAR', v: m[0][k].toUpperCase(), p: i + k, text: m[0][k] });
+        }
+        i += m[0].length; continue;
+      }
+      var extra = '';
+      if (c === '<' || c === '=' || c === '-') extra = ' Did you mean -> or <-> ?';
+      throw perr('Unknown character "' + c + '".' + extra, i);
+    }
+    return toks;
+  }
+
+  /* ---------- Parser ---------- */
+  function parse(src) {
+    var toks = tokenize(src), i = 0;
+    if (!toks.length) throw perr('The expression is empty.', 0);
+    function peek() { return toks[i]; }
+    function bin(op, a, b) { return { k: 'bin', op: op, a: a, b: b }; }
+    function isOp(t, list) { return t && t.t === 'OP' && list.indexOf(t.v) !== -1; }
+    function startsFactor(t) { return t && (t.t === 'VAR' || t.t === 'CONST' || t.t === 'LP' || t.t === 'NOT'); }
+
+    function pIff() {
+      var l = pImp();
+      while (isOp(peek(), ['IFF'])) { i++; l = bin('IFF', l, pImp()); }
+      return l;
+    }
+    function pImp() {
+      var l = pOr();
+      if (isOp(peek(), ['IMP'])) { i++; return bin('IMP', l, pImp()); }
+      return l;
+    }
+    function pOr() {
+      var l = pXor(), t;
+      while (isOp((t = peek()), ['OR', 'NOR'])) { i++; l = bin(t.v, l, pXor()); }
+      return l;
+    }
+    function pXor() {
+      var l = pAnd(), t;
+      while (isOp((t = peek()), ['XOR', 'XNOR'])) { i++; l = bin(t.v, l, pAnd()); }
+      return l;
+    }
+    function pAnd() {
+      var l = pUnary(), t;
+      for (;;) {
+        t = peek();
+        if (isOp(t, ['AND', 'NAND'])) { i++; l = bin(t.v, l, pUnary()); }
+        else if (startsFactor(t)) { l = bin('AND', l, pUnary()); }
+        else break;
+      }
+      return l;
+    }
+    function pUnary() {
+      var t = peek();
+      if (t && t.t === 'NOT') { i++; return { k: 'not', a: pUnary() }; }
+      return pPostfix();
+    }
+    function pPostfix() {
+      var p = pPrimary();
+      while (peek() && peek().t === 'PRIME') { i++; p = { k: 'not', a: p }; }
+      return p;
+    }
+    function pPrimary() {
+      var t = toks[i++];
+      if (!t) throw perr('The expression ends too early. Something is missing after the last operator.', src.length);
+      if (t.t === 'VAR') return { k: 'var', n: t.v };
+      if (t.t === 'CONST') return { k: 'const', v: t.v };
+      if (t.t === 'LP') {
+        var e = pIff(), r = toks[i];
+        if (!r || r.t !== 'RP') throw perr('Missing a closing parenthesis ")".', r ? r.p : src.length);
+        i++;
+        return e;
+      }
+      if (t.t === 'RP') throw perr('Unexpected ")" here. Is something missing before it?', t.p);
+      if (t.t === 'OP') throw perr('"' + t.text + '" needs a value on its left side.', t.p);
+      throw perr('Unexpected "' + t.text + '" here. Expected a variable, 0 or 1, NOT, or "(".', t.p);
+    }
+
+    var tree = pIff();
+    if (i < toks.length) {
+      var t = toks[i];
+      if (t.t === 'RP') throw perr('Extra closing parenthesis ")" with no matching "(".', t.p);
+      if (t.t === 'PRIME') throw perr('The \' must come right after a variable or ")".', t.p);
+      throw perr('Unexpected "' + t.text + '" here.', t.p);
+    }
+    return tree;
+  }
+
+  /* ---------- Display of expressions ---------- */
+  var SYM = { AND: '∧', OR: '∨', XOR: '⊕', NAND: '⊼', NOR: '⊽', XNOR: '⊙', IMP: '→', IFF: '↔' };
+  var ASSOC = { AND: 1, OR: 1, XOR: 1 };
+  function show(n, style) {
+    if (n.k === 'var') return n.n;
+    if (n.k === 'const') return String(n.v);
+    function wrap(c) {
+      var s = show(c, style);
+      return (c.k === 'bin' && !(c.op === n.op && ASSOC[n.op])) ? '(' + s + ')' : s;
+    }
+    if (n.k === 'not') {
+      var inner = show(n.a, style);
+      if (n.a.k === 'bin') inner = '(' + inner + ')';
+      return (style === 'word' ? 'NOT ' : '¬') + inner;
+    }
+    var op = style === 'word' ? (n.op === 'IMP' ? 'IMPLIES' : n.op) : SYM[n.op];
+    // wrap() relies on n.op; for 'bin' only
+    return wrap(n.a) + ' ' + op + ' ' + wrap(n.b);
+  }
+
+  /* ---------- Evaluation ---------- */
+  function collectVars(n, set) {
+    if (n.k === 'var') set[n.n] = 1;
+    else if (n.k === 'not') collectVars(n.a, set);
+    else if (n.k === 'bin') { collectVars(n.a, set); collectVars(n.b, set); }
+  }
+  function evalTree(n, ctx) {
+    var key = show(n, 'sym');
+    if (ctx.memo[key]) return ctx.memo[key];
+    var rows = ctx.rows, out = new Uint8Array(rows), r, a, b;
+    if (n.k === 'var') {
+      var sh = ctx.nv - 1 - ctx.idx[n.n];
+      for (r = 0; r < rows; r++) out[r] = (r >> sh) & 1;
+    } else if (n.k === 'const') {
+      for (r = 0; r < rows; r++) out[r] = n.v;
+    } else if (n.k === 'not') {
+      a = evalTree(n.a, ctx);
+      for (r = 0; r < rows; r++) out[r] = 1 - a[r];
+    } else {
+      a = evalTree(n.a, ctx); b = evalTree(n.b, ctx);
+      for (r = 0; r < rows; r++) {
+        var x = a[r], y = b[r], v;
+        switch (n.op) {
+          case 'AND': v = x & y; break;
+          case 'OR': v = x | y; break;
+          case 'XOR': v = x ^ y; break;
+          case 'NAND': v = 1 - (x & y); break;
+          case 'NOR': v = 1 - (x | y); break;
+          case 'XNOR': v = 1 - (x ^ y); break;
+          case 'IMP': v = (1 - x) | y; break;
+          default: v = 1 - (x ^ y); // IFF
+        }
+        out[r] = v;
+      }
+    }
+    ctx.memo[key] = out;
+    return out;
+  }
+  // Non-leaf sub-expressions, children before parents, without duplicates.
+  function subExprs(n, list, seen) {
+    if (n.k === 'not') subExprs(n.a, list, seen);
+    else if (n.k === 'bin') { subExprs(n.a, list, seen); subExprs(n.b, list, seen); }
+    if (n.k === 'not' || n.k === 'bin') {
+      var key = show(n, 'sym');
+      if (!seen[key]) { seen[key] = 1; list.push(n); }
+    }
+  }
+
+  /* ---------- State / rendering ---------- */
+  var last = { header: [], rows: [] };
+  var lastInput = null;
+
+  function setError(which, e) {
+    var box = $('err');
+    var src = which === 2 ? $('expr2').value : $('expr').value;
+    var title = which === 0 ? '' : (which === 2 ? 'Second expression: ' : 'First expression: ');
+    var html = esc(title + e.message);
+    if (e.isParse && typeof e.pos === 'number') {
+      html += '<code>' + esc(src) + '\n' + ' '.repeat(Math.min(e.pos, 200)) + '^</code>';
+    }
+    box.innerHTML = html; box.classList.add('show');
+    $('out').hidden = true; $('cfCard').hidden = true;
+    $('placeholder').hidden = false; $('placeholder').textContent = 'Fix the expression to see the truth table.';
+  }
+  function clearOutputs(msg) {
+    $('out').hidden = true; $('cfCard').hidden = true;
+    $('placeholder').hidden = false; $('placeholder').textContent = msg;
+  }
+
+  function lits(bits, names, mode) {
+    // mode 'sop': 1 -> X, 0 -> X'.  mode 'pos': 0 -> X, 1 -> X'
+    return names.map(function (nm, k) {
+      var one = bits[k] === 1;
+      var plain = mode === 'sop' ? one : !one;
+      return plain ? nm : nm + "'";
+    });
+  }
+  function listCap(arr, cap) { return arr.length > cap ? arr.slice(0, cap).join(', ') + ', … (' + (arr.length - cap) + ' more)' : arr.join(', '); }
+
+  function update() {
+    var errBox = $('err');
+    errBox.classList.remove('show'); errBox.textContent = '';
+    var s1 = $('expr').value, s2 = $('expr2').value;
+    if (!s1.trim()) { clearOutputs('Type an expression to see its truth table.'); return; }
+
+    var t1, t2 = null;
+    try { t1 = parse(s1); } catch (e) { if (e.isParse) { setError(s2.trim() ? 1 : 0, e); return; } throw e; }
+    if (s2.trim()) { try { t2 = parse(s2); } catch (e2) { if (e2.isParse) { setError(2, e2); return; } throw e2; } }
+
+    var set = {}; collectVars(t1, set); if (t2) collectVars(t2, set);
+    var names = Object.keys(set).sort();
+    var nv = names.length;
+    if (nv > MAXV) {
+      setError(0, { message: 'This uses ' + nv + ' variables (' + names.join(', ') + '). The limit is ' + MAXV + ' variables (256 rows).' });
+      return;
+    }
+    var rows = 1 << nv, idx = {};
+    names.forEach(function (nm, k) { idx[nm] = k; });
+    var ctx = { nv: nv, rows: rows, idx: idx, memo: {} };
+
+    var style = $('optNote').value, tf = $('optShow').value === 'TF', desc = $('optOrder').value === 'desc';
+    var showMid = $('optMid').checked;
+    function fv(v) { return tf ? (v ? 'T' : 'F') : String(v); }
+    function rowAt(i) { return desc ? rows - 1 - i : i; }
+
+    var f1 = evalTree(t1, ctx), f2 = t2 ? evalTree(t2, ctx) : null;
+
+    /* ----- columns ----- */
+    var cols = []; // {label, cls, data}
+    names.forEach(function (nm, k) {
+      var data = new Uint8Array(rows), sh = nv - 1 - k;
+      for (var r = 0; r < rows; r++) data[r] = (r >> sh) & 1;
+      cols.push({ label: nm, cls: 'var', data: data });
+    });
+    var mids = 0;
+    if (!t2) {
+      if (showMid) {
+        var list = [], seen = {};
+        subExprs(t1, list, seen);
+        var rootKey = show(t1, 'sym');
+        list.forEach(function (n) {
+          if (show(n, 'sym') === rootKey) return;
+          cols.push({ label: show(n, style), cls: 'mid', data: evalTree(n, ctx) });
+          mids++;
+        });
+      }
+      cols.push({ label: show(t1, style), cls: 'fin', data: f1 });
+    } else {
+      cols.push({ label: show(t1, style), cls: 'fin', data: f1 });
+      cols.push({ label: show(t2, style), cls: 'fin', data: f2 });
+    }
+    var nVarCols = nv;
+    var hdr = cols.map(function (c) { return c.label; });
+    var lastVar = nVarCols - 1;
+
+    var html = '<thead><tr>';
+    cols.forEach(function (c, k) {
+      html += '<th class="' + c.cls + (k === lastVar ? ' sep' : '') + '">' + esc(c.label) + '</th>';
+    });
+    if (t2) html += '<th class="mid">Same?</th>';
+    html += '</tr></thead><tbody>';
+    var plain = [];
+    var diffs = 0;
+    for (var i = 0; i < rows; i++) {
+      var r = rowAt(i), cells = [], diff = t2 && f1[r] !== f2[r];
+      if (diff) diffs++;
+      html += '<tr' + (diff ? ' class="diff"' : '') + '>';
+      cols.forEach(function (c, k) {
+        var v = c.data[r];
+        var cls = c.cls + (c.cls === 'fin' ? (v ? ' t' : ' f') : '') + (k === lastVar ? ' sep' : '');
+        html += '<td class="' + cls + '">' + fv(v) + '</td>';
+        cells.push(fv(v));
+      });
+      if (t2) {
+        var same = f1[r] === f2[r];
+        html += '<td class="mid">' + (same ? '✓' : '✗') + '</td>';
+        cells.push(same ? 'same' : 'different');
+      }
+      html += '</tr>';
+      plain.push(cells);
+    }
+    html += '</tbody>';
+    $('tt').innerHTML = html;
+    last.header = hdr.concat(t2 ? ['Same?'] : []); last.rows = plain;
+
+    /* ----- headline + stats ----- */
+    $('exprShow').textContent = t2
+      ? 'F₁ = ' + show(t1, style) + '\nF₂ = ' + show(t2, style)
+      : show(t1, style);
+    $('exprShow').style.whiteSpace = 'pre-wrap';
+
+    var trueCount = 0; for (var q = 0; q < rows; q++) trueCount += f1[q];
+    var falseCount = rows - trueCount;
+    var stats = '';
+    function box(k, v, cls) { return '<div class="box ' + (cls || '') + '"><div class="k">' + esc(k) + '</div><div class="v">' + esc(v) + '</div></div>'; }
+    if (t2) {
+      var eq = diffs === 0;
+      stats += box('Are they equivalent?', eq ? 'Yes, equivalent' : 'No, not equivalent', eq ? 'good' : 'bad');
+      stats += box('Rows that differ', diffs + ' of ' + rows, eq ? '' : 'bad');
+    } else {
+      var kind = trueCount === rows ? 'Tautology (always true)' : trueCount === 0 ? 'Contradiction (always false)' : 'Contingent (sometimes true)';
+      stats += box('Type', kind, trueCount === rows ? 'good' : trueCount === 0 ? 'bad' : 'info');
+      stats += box('Rows where result is ' + fv(1), trueCount + ' of ' + rows);
+      stats += box('Rows where result is ' + fv(0), falseCount + ' of ' + rows);
+    }
+    stats += box('Variables', nv ? names.join(', ') + ' (' + nv + ')' : 'none');
+    $('stats').innerHTML = stats;
+    $('tblNote').textContent = t2
+      ? 'Intermediate columns are hidden while comparing. Rows that differ are highlighted.'
+      : (mids ? mids + ' intermediate column' + (mids > 1 ? 's' : '') + ' shown before the result.' : 'The last column is the result.');
+
+    /* ----- canonical forms (first expression) ----- */
+    var mt = [], Mt = [];
+    for (var z = 0; z < rows; z++) (f1[z] ? mt : Mt).push(z);
+    var bitsOf = function (rr) { var b = []; for (var k = 0; k < nv; k++) b.push((rr >> (nv - 1 - k)) & 1); return b; };
+    var sop, pos;
+    if (nv === 0) { sop = pos = String(f1[0]); }
+    else {
+      sop = mt.length ? mt.slice(0, 32).map(function (rr) { return lits(bitsOf(rr), names, 'sop').join(''); }).join(' + ') + (mt.length > 32 ? ' + … (' + (mt.length - 32) + ' more terms)' : '') : '0';
+      pos = Mt.length ? Mt.slice(0, 32).map(function (rr) { return '(' + lits(bitsOf(rr), names, 'pos').join(' + ') + ')'; }).join('') + (Mt.length > 32 ? ' … (' + (Mt.length - 32) + ' more clauses)' : '') : '1';
+    }
+    var cf = '';
+    function frow(label, value, key) {
+      return '<div class="form-row"><div class="k"><span>' + esc(label) + '</span>' +
+        (key ? '<button type="button" class="mini" data-cp="' + key + '">Copy</button>' : '') +
+        '</div><div class="v" data-v="' + (key || '') + '">' + esc(value) + '</div></div>';
+    }
+    cf += frow('Minterms (rows where F = 1)', mt.length ? 'Σm(' + listCap(mt, 64) + ')' : 'Σm( )  none', 'mt');
+    cf += frow('Maxterms (rows where F = 0)', Mt.length ? 'ΠM(' + listCap(Mt, 64) + ')' : 'ΠM( )  none', 'Mt');
+    cf += frow('Canonical sum of products (SOP)', sop, 'sop');
+    cf += frow('Canonical product of sums (POS)', pos, 'pos');
+    cf += '<p class="note">' + (t2 ? 'Shown for the first expression. ' : '') + 'A\' means NOT A. These are the full canonical forms (every term contains every variable); they are not simplified.</p>';
+    $('cf').innerHTML = cf;
+    $('cfCard').hidden = false;
+    $('cfCard')._raw = {
+      mt: mt.length ? 'm(' + mt.join(', ') + ')' : '', Mt: Mt.length ? 'M(' + Mt.join(', ') + ')' : '',
+      sop: sop, pos: pos
+    };
+
+    $('placeholder').hidden = true; $('out').hidden = false;
+  }
+
+  /* ---------- Copy ---------- */
+  function copyText(text, btn, label) {
+    function done() {
+      btn.textContent = 'Copied!'; btn.classList.add('done');
+      setTimeout(function () { btn.textContent = label; btn.classList.remove('done'); }, 1200);
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = 'Press Ctrl+C'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  $('copyTable').addEventListener('click', function () {
+    var lines = [last.header.join('\t')].concat(last.rows.map(function (r) { return r.join('\t'); }));
+    copyText(lines.join('\n'), this, 'Copy table');
+  });
+  $('cf').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.mini'); if (!b) return;
+    var raw = $('cfCard')._raw[b.getAttribute('data-cp')];
+    var el = $('cf').querySelector('[data-v="' + b.getAttribute('data-cp') + '"]');
+    var txt = b.getAttribute('data-cp') === 'sop' || b.getAttribute('data-cp') === 'pos' ? raw : el.textContent;
+    copyText(txt, b, 'Copy');
+  });
+
+  /* ---------- Setup ---------- */
+  var EXAMPLES = [
+    { e: 'A AND B' }, { e: 'A XOR B' }, { e: '(A OR B) AND NOT C' }, { e: 'A -> B' },
+    { e: "AB + A'C" }, { e: 'A B + B C + A C' },
+    { e: 'NOT (A AND B)', e2: 'NOT A OR NOT B' }
+  ];
+  $('chips').innerHTML = EXAMPLES.map(function (x, i) {
+    return '<button type="button" class="chip" data-i="' + i + '">' + esc(x.e) + (x.e2 ? ' <small>vs</small>' : '') + '</button>';
+  }).join('');
+  $('chips').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.chip'); if (!b) return;
+    var x = EXAMPLES[Number(b.getAttribute('data-i'))];
+    $('expr').value = x.e; $('expr2').value = x.e2 || ''; update();
+  });
+
+  // Operator buttons insert at the caret of the last used expression box
+  $('expr').addEventListener('focus', function () { lastInput = $('expr'); });
+  $('expr2').addEventListener('focus', function () { lastInput = $('expr2'); });
+  $('ops').addEventListener('mousedown', function (ev) { if (ev.target.closest('.op')) ev.preventDefault(); });
+  $('ops').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.op'); if (!b) return;
+    var inp = lastInput || $('expr'), txt = b.getAttribute('data-ins');
+    var s = inp.selectionStart == null ? inp.value.length : inp.selectionStart;
+    var e = inp.selectionEnd == null ? s : inp.selectionEnd;
+    inp.value = inp.value.slice(0, s) + txt + inp.value.slice(e);
+    var pos = s + txt.length;
+    inp.focus(); try { inp.setSelectionRange(pos, pos); } catch (x) { /* ignore */ }
+    update();
+  });
+
+  // Reference tables
+  $('opTable').innerHTML = '<thead><tr><th>Operation</th><th>Words</th><th>Symbols</th></tr></thead><tbody>' + [
+    ['NOT', 'NOT', "! ~ ¬ A'"],
+    ['AND', 'AND', '& && * . · ∧ (or letters side by side)'],
+    ['OR', 'OR', '| || + ∨'],
+    ['XOR', 'XOR', '^ ⊕'],
+    ['NAND', 'NAND', '⊼'],
+    ['NOR', 'NOR', '⊽'],
+    ['XNOR', 'XNOR', '⊙'],
+    ['Implication', 'IMPLIES', '-> => →'],
+    ['Equivalence', 'IFF', '<-> <=> ↔']
+  ].map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td class="m">' + esc(r[1]) + '</td><td class="m">' + esc(r[2]) + '</td></tr>'; }).join('') + '</tbody>';
+  (function () {
+    var h = '<thead><tr><th>A</th><th>B</th><th>AND</th><th>OR</th><th>XOR</th><th>NAND</th><th>NOR</th><th>XNOR</th></tr></thead><tbody>';
+    for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) {
+      var v = [a, b, a & b, a | b, a ^ b, 1 - (a & b), 1 - (a | b), 1 - (a ^ b)];
+      h += '<tr>' + v.map(function (x) { return '<td>' + x + '</td>'; }).join('') + '</tr>';
+    }
+    $('gates').innerHTML = h + '</tbody>';
+  })();
+
+  ['expr', 'expr2'].forEach(function (id) { $(id).addEventListener('input', update); });
+  ['optShow', 'optOrder', 'optNote', 'optMid'].forEach(function (id) { $(id).addEventListener('change', update); });
+  $('clear').addEventListener('click', function () { $('expr').value = ''; $('expr2').value = ''; update(); $('expr').focus(); });
+
+  update();
+})();
+</script>
+</body>
+</html>
