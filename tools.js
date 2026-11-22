@@ -54,9 +54,10 @@ window.STUDENT_TOOLS = [
     id: "truth-table",
     name: "Truth Table Generator",
     category: "digital",
-    status: "soon",
-    description: "Generate truth tables for Boolean expressions.",
-    keywords: "boolean logic truth table and or not xor"
+    status: "available",
+    href: "tools/truth-table.html",
+    description: "Generate truth tables for Boolean expressions, with minterms, SOP/POS and an equivalence check.",
+    keywords: "boolean logic truth table and or not xor nand nor xnor minterm maxterm sop pos gate expression equivalence tautology digital"
   },
   {
     id: "unit-converter",
