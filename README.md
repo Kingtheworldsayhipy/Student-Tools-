@@ -210,9 +210,9 @@ python3 -m http.server 8000      # then visit http://localhost:8000
 
 ## 👋 About me
 
-Hi, I'm **[YOUR NAME]**, an engineering student based in **[YOUR CITY, COUNTRY]**. I am looking for **[internship / junior / graduate]** opportunities in **[your field, e.g. software, embedded systems, electronics]**, and I am open to relocating or working remotely.
+Hi, I'm **King**, an engineering student based in **Gottham**. I am looking for **[internship / junior / graduate]** opportunities in **[software, embedded systems, electronics]**, and I am open to relocating or working remotely.
 
-📧 **[your.email@example.com]** &nbsp;·&nbsp; 💼 **[LinkedIn URL]** &nbsp;·&nbsp; 🐙 [GitHub](https://github.com/kingtheworldsayhipy)
+📧 i have my discord in my main profile 🐙 [GitHub](https://github.com/kingtheworldsayhipy)
 
 <div align="center">
 <br>
