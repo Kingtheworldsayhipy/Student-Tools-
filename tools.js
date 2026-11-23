@@ -63,9 +63,10 @@ window.STUDENT_TOOLS = [
     id: "unit-converter",
     name: "Engineering Unit Converter",
     category: "engineering",
-    status: "soon",
-    description: "Convert common engineering and measurement units.",
-    keywords: "unit conversion measurement convert"
+    status: "available",
+    href: "tools/unit-converter.html",
+    description: "Convert length, mass, pressure, energy, power, temperature, torque and more.",
+    keywords: "unit conversion measurement convert length area volume mass time speed force pressure energy power temperature angle frequency torque data metric imperial psi bar hp celsius fahrenheit kelvin"
   },
   {
     id: "power-calculator",
