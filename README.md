@@ -209,7 +209,7 @@ python3 -m http.server 8000      # then visit http://localhost:8000
 
 ## 👋 About me
 
-Hi, I'm **[King]**, an engineering student based in **[Gotthan]**. I am looking for **[internship / junior / graduate]** opportunities in **[ software, embedded systems, electronics]**, and I am open to relocating or working remotely.
+Hi, I'm **King** , an engineering student based in **Gottham**. I am looking for **internship / junior / graduate** opportunities in **software, embedded systems, electronics**, and I am open to relocating or working remotely.
 
 📧 **[i have my discord on my main profile]** &nbsp;·&nbsp;  &nbsp;·&nbsp; 🐙 [GitHub](https://github.com/kingtheworldsayhipy)
 
