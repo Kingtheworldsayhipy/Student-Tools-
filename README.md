@@ -10,7 +10,7 @@
 
 [![Live demo](https://img.shields.io/badge/%F0%9F%9A%80%20Live%20demo-open%20the%20site-2563eb?style=for-the-badge)](https://kingtheworldsayhipy.github.io/Student-Tools-/)
 &nbsp;
-![Tools](https://img.shields.io/badge/tools-6-16a34a?style=for-the-badge)
+![Growing](https://img.shields.io/badge/new%20tool-every%20day-16a34a?style=for-the-badge)
 &nbsp;
 ![Stack](https://img.shields.io/badge/stack-HTML%20%C2%B7%20CSS%20%C2%B7%20JS-0f172a?style=for-the-badge)
 &nbsp;
@@ -28,7 +28,7 @@
 
 | | |
 |---|---|
-| **What it is** | A web app with 6 calculators and converters that engineering and university students use every day |
+| **What it is** | A growing web app of calculators and converters that engineering and university students use every day |
 | **Why I built it** | Studying engineering meant 10 to 20 open tabs per session. I wanted everything in one clean, fast place |
 | **How it was built** | Deliberately with AI. I acted as product owner, architect, reviewer and tester; the AI acted as a very fast pair-programmer |
 | **Stack** | Vanilla HTML, CSS and JavaScript. No framework, no build step, no backend, no paid services |
@@ -93,6 +93,8 @@ I wanted to learn how far a student can get by **directing** an AI assistant wel
 
 ## 🛠️ The tools
 
+> The live [dashboard](https://kingtheworldsayhipy.github.io/Student-Tools-/) is always the up-to-date list. This table highlights the tools available so far.
+
 | Tool | What it does | Try it |
 |---|---|---|
 | **Ohm's Law Calculator** | Enter any two of voltage, current, resistance and power to get the other two. Unit drop-downs (µ, m, k, M) and the formulas used are shown | [Open](https://kingtheworldsayhipy.github.io/Student-Tools-/tools/ohm-law.html) |
@@ -126,12 +128,9 @@ The key decision: **one stable dashboard, one file per tool.** If one tool has a
 flowchart LR
     U([Student's browser]) --> I["index.html<br/>dashboard (stable)"]
     I -- reads --> R["tools.js<br/>tool registry"]
-    R --> T1["tools/ohm-law.html"]
-    R --> T2["tools/power-calculator.html"]
-    R --> T3["tools/gpa-calculator.html"]
-    R --> T4["tools/number-system-converter.html"]
-    R --> T5["tools/truth-table.html"]
-    R --> T6["tools/unit-converter.html"]
+    R --> T1["tools/tool-1.html"]
+    R --> T2["tools/tool-2.html"]
+    R --> T3["tools/tool-n.html<br/>(one file per tool)"]
     style I fill:#dbeafe,stroke:#2563eb,color:#0f172a
     style R fill:#dcfce7,stroke:#16a34a,color:#0f172a
 ```
@@ -172,7 +171,7 @@ The dashboard builds its cards, category counts and search automatically from th
 ## 🗺️ Roadmap
 
 - [x] Dashboard with search and category filters
-- [x] Six tools: Ohm's Law, Power, GPA, Number System, Truth Table, Unit Converter
+- [x] First tools shipped: Ohm's Law, Power, GPA, Number System, Truth Table, Unit Converter
 - [x] Consistent design across all tools
 - [ ] Privacy Policy and About pages
 - [ ] A simple, privacy-friendly visitor counter
@@ -210,9 +209,9 @@ python3 -m http.server 8000      # then visit http://localhost:8000
 
 ## 👋 About me
 
-Hi, I'm **King**, an engineering student based in **Gottham**. I am looking for **[internship / junior / graduate]** opportunities in **[software, embedded systems, electronics]**, and I am open to relocating or working remotely.
+Hi, I'm **[King]**, an engineering student based in **[Gotthan]**. I am looking for **[internship / junior / graduate]** opportunities in **[ software, embedded systems, electronics]**, and I am open to relocating or working remotely.
 
-📧 i have my discord in my main profile 🐙 [GitHub](https://github.com/kingtheworldsayhipy)
+📧 **[i have my discord on my main profile]** &nbsp;·&nbsp;  &nbsp;·&nbsp; 🐙 [GitHub](https://github.com/kingtheworldsayhipy)
 
 <div align="center">
 <br>
